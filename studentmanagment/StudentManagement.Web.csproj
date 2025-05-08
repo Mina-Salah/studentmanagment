@@ -7,18 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\Interfaces\IStudentService.cs" />
-    <Content Remove="wwwroot\Interfaces\IStudentSubjectService.cs" />
-    <Content Remove="wwwroot\Interfaces\ISubjectService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="wwwroot\Interfaces\IStudentService.cs" />
-    <Compile Include="wwwroot\Interfaces\IStudentSubjectService.cs" />
-    <Compile Include="wwwroot\Interfaces\ISubjectService.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BLL\StudentManagement.Core.csproj" />
     <ProjectReference Include="..\DAL\StudentManagement.Data.csproj" />
     <ProjectReference Include="..\StudentManagement.Services\StudentManagement.Services.csproj" />

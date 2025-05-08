@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Core.Entities;
+using StudentManagement.Core.Interfaces;
 using StudentManagement.Services.Interfaces;
 using StudentManagement.Web.ViewModels;
-using StudentManagement.Core.Interfaces;
 
 namespace StudentManagement.Web.Controllers
 {
@@ -24,18 +24,20 @@ namespace StudentManagement.Web.Controllers
         {
             var students = await _studentService.GetAllStudentsAsync();
 
-            var viewModels = students.Select(s => new StudentFormViewModel
+            var viewModels = students.Select(s =>
             {
-                Id = s.Id,
-                Name = s.Name,
-                Address = s.Address,
-                DateOfBirth = s.DateOfBirth,
-                Subjects = s.StudentSubjects.Select(ss => ss.Subject.Name).ToList()
+                var vm = _mapper.Map<StudentFormViewModel>(s);
+                vm.Subjects = s.StudentSubjects.Select(ss => new SubjectCheckboxItem
+                {
+                    Id = ss.SubjectId,
+                    Name = ss.Subject.Name,
+                    IsSelected = true
+                }).ToList();
+                return vm;
             }).ToList();
 
             return View(viewModels);
         }
-    
 
         public async Task<IActionResult> Create()
         {
@@ -59,6 +61,7 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
 
             var student = _mapper.Map<Student>(model);
+
             var selectedSubjectIds = model.Subjects
                 .Where(s => s.IsSelected)
                 .Select(s => s.Id)
@@ -74,21 +77,15 @@ namespace StudentManagement.Web.Controllers
             if (student == null)
                 return NotFound();
 
-            var allSubjects = await _unitOfWork.Subjects.GetAllAsync();
+            var viewModel = _mapper.Map<StudentFormViewModel>(student);
 
-            var viewModel = new StudentFormViewModel
+            var allSubjects = await _unitOfWork.Subjects.GetAllAsync();
+            viewModel.Subjects = allSubjects.Select(s => new SubjectCheckboxItem
             {
-                Id = student.Id,
-                Name = student.Name,
-                DateOfBirth = student.DateOfBirth,
-                Address = student.Address,
-                Subjects = allSubjects.Select(s => new SubjectCheckboxItem
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    IsSelected = student.StudentSubjects.Any(ss => ss.SubjectId == s.Id)
-                }).ToList()
-            };
+                Id = s.Id,
+                Name = s.Name,
+                IsSelected = student.StudentSubjects.Any(ss => ss.SubjectId == s.Id)
+            }).ToList();
 
             return View(viewModel);
         }
@@ -100,6 +97,7 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
 
             var student = _mapper.Map<Student>(model);
+
             var selectedSubjectIds = model.Subjects
                 .Where(s => s.IsSelected)
                 .Select(s => s.Id)

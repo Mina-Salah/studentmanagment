@@ -5,7 +5,7 @@ using StudentManagement.Services.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace StudentManagement.Servicess.Implementations
+namespace StudentManagement.Services.Implementations
 {
     public class SubjectService : ISubjectService
     {

@@ -4,8 +4,8 @@ using StudentManagement.Core.Mapping;
 using StudentManagement.Data.Contextt;
 using StudentManagement.Data.Repositories;
 using StudentManagement.Data.UnitOfWork;
+using StudentManagement.Services.Implementations;
 using StudentManagement.Services.Interfaces;
-using StudentManagement.Servicess.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 

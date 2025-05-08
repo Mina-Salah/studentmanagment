@@ -3,15 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentManagement.Web", "studentmanagment\StudentManagement.Web.csproj", "{F461F1D7-1B55-4DB5-B418-9C1D7FB939A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentManagement.Web", "studentmanagment\StudentManagement.Web.csproj", "{F461F1D7-1B55-4DB5-B418-9C1D7FB939A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentManagement.Data", "DAL\StudentManagement.Data.csproj", "{EFE40EFB-92EC-4FDC-A6BF-3EA967FD72F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentManagement.Data", "DAL\StudentManagement.Data.csproj", "{EFE40EFB-92EC-4FDC-A6BF-3EA967FD72F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentManagement.Core", "BLL\StudentManagement.Core.csproj", "{C49682F5-72A5-46F1-B85F-98F819D7788A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentManagement.Core", "BLL\StudentManagement.Core.csproj", "{C49682F5-72A5-46F1-B85F-98F819D7788A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentManagement.Services", "StudentManagement.Services\StudentManagement.Services.csproj", "{5C910A42-9329-4F88-9A80-C8AFEA186719}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentManagement.Tests", "StudentManagement.Tests\StudentManagement.Tests.csproj", "{0779762D-28C0-4FED-A102-34C6DA5E4E00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StudentManagement.Services", "StudentManagement.Services\StudentManagement.Services.csproj", "{5C910A42-9329-4F88-9A80-C8AFEA186719}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{5C910A42-9329-4F88-9A80-C8AFEA186719}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C910A42-9329-4F88-9A80-C8AFEA186719}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C910A42-9329-4F88-9A80-C8AFEA186719}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0779762D-28C0-4FED-A102-34C6DA5E4E00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0779762D-28C0-4FED-A102-34C6DA5E4E00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0779762D-28C0-4FED-A102-34C6DA5E4E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0779762D-28C0-4FED-A102-34C6DA5E4E00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
