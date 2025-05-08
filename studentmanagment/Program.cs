@@ -5,7 +5,7 @@ using StudentManagement.Data.Contextt;
 using StudentManagement.Data.Repositories;
 using StudentManagement.Data.UnitOfWork;
 using StudentManagement.Services.Interfaces;
-using StudentManagement.Servicess.Implementations;
+using StudentManagement.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
