@@ -1,51 +1,223 @@
 ﻿@model StudentManagement.Web.ViewModels.StudentFormViewModel
-
 @{
-    ViewData["Title"] = "Edit Student";
+    ViewData["Title"] = "تعديل بيانات الطالب";
 }
 
-<h2>Edit Student</h2>
+<div class="container mt-4">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-warning text-white">
+            <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i>@ViewData["Title"] - @Model.Name</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-4">
+                            <label asp-for="Name" class="form-label fw-bold">اسم الطالب</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input asp-for="Name" class="form-control" placeholder="أدخل اسم الطالب" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger mt-1 d-block"></span>
+                        </div>
 
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+                        <div class="form-group mb-4">
+                            <label asp-for="DateOfBirth" class="form-label fw-bold">تاريخ الميلاد</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            </div>
+                            <span asp-validation-for="DateOfBirth" class="text-danger mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Address" class="form-label fw-bold">العنوان</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input asp-for="Address" class="form-control" placeholder="أدخل عنوان الطالب" />
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger mt-1 d-block"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label fw-bold mb-3">
+                                <i class="fas fa-book me-1"></i> المواد الدراسية
+                                <span class="badge bg-info ms-2">@Model.Subjects.Count(s => s.IsSelected) مادة محددة</span>
+                            </label>
+                            <div class="subjects-container p-3 border rounded bg-light">
+                                @if (!Model.Subjects.Any())
+                                {
+                                    <div class="alert alert-info text-center">
+                                        <i class="fas fa-info-circle me-1"></i> لا توجد مواد دراسية متاحة
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="row">
+                                        @for (int i = 0; i < Model.Subjects.Count; i++)
+                                        {
+                                            <div class="col-md-6 mb-2">
+                                                <div class="form-check subject-checkbox @(Model.Subjects[i].IsSelected ? "selected" : "")">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="Subjects[@i].IsSelected" value="true"
+                                                           id="subject_@Model.Subjects[i].Id"
+                                                    @(Model.Subjects[i].IsSelected ? "checked" : "") />
+                                                    <input type="hidden" name="Subjects[@i].Id" value="@Model.Subjects[i].Id" />
+                                                    <input type="hidden" name="Subjects[@i].Name" value="@Model.Subjects[i].Name" />
+                                                    <label class="form-check-label" for="subject_@Model.Subjects[i].Id">
+                                                        @Model.Subjects[i].Name
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mt-4">
+                    <button type="submit" class="btn btn-warning text-white">
+                        <i class="fas fa-save me-1"></i> حفظ التغييرات
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-arrow-left me-1"></i> العودة للقائمة
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label asp-for="DateOfBirth"></label>
-        <input asp-for="DateOfBirth" class="form-control" type="date" />
-        <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label asp-for="Address"></label>
-        <input asp-for="Address" class="form-control" />
-        <span asp-validation-for="Address" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label>Subjects</label><br />
-        @for (int i = 0; i < Model.Subjects.Count; i++)
-        {
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="Subjects[@i].IsSelected" value="true" @(Model.Subjects[i].IsSelected ? "checked" : "") />
-                <input type="hidden" name="Subjects[@i].Id" value="@Model.Subjects[i].Id" />
-                <input type="hidden" name="Subjects[@i].Name" value="@Model.Subjects[i].Name" />
-                <label class="form-check-label">@Model.Subjects[i].Name</label>
-            </div>
-        }
-    </div>
-
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $(document).ready(function () {
+            // إضافة تأثيرات بصرية عند التركيز
+            $('input').focus(function () {
+                $(this).parent().addClass('border-warning');
+            }).blur(function () {
+                $(this).parent().removeClass('border-warning');
+            });
+
+            // تأثير التحويم على مربعات الاختيار
+            $('.subject-checkbox').hover(
+                function () { $(this).addClass('bg-white shadow-sm rounded p-1'); },
+                function () { $(this).removeClass('bg-white shadow-sm rounded p-1'); }
+            );
+
+            // تفاعل مع تغيير حالة الاختيار
+            $('.form-check-input').change(function () {
+                if ($(this).is(':checked')) {
+                    $(this).closest('.subject-checkbox').addClass('selected');
+                } else {
+                    $(this).closest('.subject-checkbox').removeClass('selected');
+                }
+
+                // تحديث عدد المواد المحددة
+                var selectedCount = $('.form-check-input:checked').length;
+                $('.badge.bg-info').text(selectedCount + ' مادة محددة');
+            });
+
+            // تحقق من صحة النموذج عند الإرسال
+            $('form').submit(function () {
+                if ($(this).valid()) {
+                    $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2"></span> جاري الحفظ...');
+                    $('button[type="submit"]').attr('disabled', true);
+                }
+            });
+        });
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            border-bottom: none;
+            padding: 15px 20px;
+            background-color: #f7b924 !important;
+        }
+
+        .btn {
+            border-radius: 5px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-warning {
+            background-color: #f7b924;
+            border-color: #f7b924;
+        }
+
+            .btn-warning:hover {
+                background-color: #e5a91f;
+                border-color: #e5a91f;
+            }
+
+        .input-group {
+            border-radius: 5px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+            .input-group:focus-within {
+                box-shadow: 0 0 0 0.2rem rgba(247, 185, 36, 0.25);
+            }
+
+        .input-group-text {
+            background-color: #f8f1d5;
+            border-right: none;
+        }
+
+        .form-control {
+            border-left: none;
+        }
+
+            .form-control:focus {
+                border-color: #ced4da;
+                box-shadow: none;
+            }
+
+        .subjects-container {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .subject-checkbox {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+            .subject-checkbox.selected {
+                background-color: #f8f1d5;
+                border-radius: 5px;
+                padding: 5px;
+            }
+
+        .form-check-input:checked + label {
+            font-weight: bold;
+            color: #f7b924;
+        }
+
+        .badge {
+            padding: 0.5em 0.8em;
+            font-weight: 500;
+            border-radius: 5px;
+        }
+    </style>
 }

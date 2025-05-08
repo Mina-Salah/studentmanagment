@@ -20,6 +20,12 @@ namespace StudentManagement.Core.Mapping
             // Entity to ViewModel
             CreateMap<Student, StudentFormViewModel>()
                 .ForMember(dest => dest.Subjects, opt => opt.Ignore());
+
+            // Subject ↔ ViewModel
+            CreateMap<Subject, SubjectCheckboxItem>()
+    .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
+
+            CreateMap<SubjectCheckboxItem, Subject>();
         }
     }
 }

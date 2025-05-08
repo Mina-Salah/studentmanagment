@@ -1,50 +1,265 @@
 ﻿@model List<StudentManagement.Web.ViewModels.StudentFormViewModel>
-
 @{
-    ViewData["Title"] = "Students";
+    ViewData["Title"] = "قائمة الطلاب";
 }
 
-<h2>Students</h2>
+<div class="container mt-4">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-user-graduate me-2"></i>@ViewData["Title"]</h3>
+        </div>
+        <div class="card-body">
+            <div class="d-flex justify-content-end mb-4">
+                <a asp-action="Create" class="btn btn-success">
+                    <i class="fas fa-plus-circle me-1"></i> إضافة طالب جديد
+                </a>
+            </div>
 
-<a asp-action="Create" class="btn btn-primary mb-3">Add New Student</a>
-
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Date Of Birth</th>
-            <th>Address</th>
-            <th>Subjects</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var student in Model)
-        {
-            <tr>
-                <td>@student.Name</td>
-                <td>@student.DateOfBirth.ToShortDateString()</td>
-                <td>@student.Address</td>
-                <td>
-                    @if (student.Subjects.Any())
-                    {
-                        <ul>
-                            @foreach (var subject in student.Subjects)
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info text-center p-4">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h5>لا يوجد طلاب مسجلين حالياً</h5>
+                    <p class="mb-0">قم بإضافة طلاب جدد باستخدام زر "إضافة طالب جديد"</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">
+                                    <i class="fas fa-user me-1 text-primary"></i>
+                                    الاسم
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-calendar-alt me-1 text-primary"></i>
+                                    تاريخ الميلاد
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-map-marker-alt me-1 text-primary"></i>
+                                    العنوان
+                                </th>
+                                <th scope="col">
+                                    <i class="fas fa-book me-1 text-primary"></i>
+                                    المواد الدراسية
+                                </th>
+                                <th scope="col" class="text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var student in Model)
                             {
-                                <li>@subject.Name</li>
+                                <tr class="student-row">
+                                    <td class="fw-bold">@student.Name</td>
+                                    <td>@student.DateOfBirth.ToShortDateString()</td>
+                                    <td>@student.Address</td>
+                                    <td>
+                                        @if (student.Subjects.Any(s => s.IsSelected))
+                                        {
+                                            <div class="mt-1">
+                                                @foreach (var subject in student.Subjects)
+                                                {
+                                                    <span class="badge bg-light text-dark me-1">@subject.Name</span>
+                                                }
+                                               
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted">لا توجد مواد</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip" title="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger"
+                                               onclick="showDeleteModal(@student.Id, '@student.Name')" data-bs-toggle="tooltip" title="حذف">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
                             }
-                        </ul>
-                    }
-                    else
-                    {
-                        <span>No subjects</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@student.Id" class="btn btn-sm btn-danger">Delete</a>
-                </td>
-            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- نافذة تأكيد الحذف المنبثقة -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-trash-alt me-2"></i> تأكيد الحذف
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    هل أنت متأكد من رغبتك في حذف الطالب "<strong id="studentNameToDelete"></strong>"؟
+                </div>
+                <p class="text-muted">هذا الإجراء لا يمكن التراجع عنه، وسيتم حذف جميع البيانات المرتبطة بهذا الطالب.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> إلغاء
+                </button>
+                <form id="deleteForm" asp-action="DeleteConfirmed" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="studentIdToDelete" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i> تأكيد الحذف
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        // دالة لعرض مودال الحذف
+        function showDeleteModal(id, name) {
+            // تعيين القيم في المودال
+            document.getElementById('studentIdToDelete').value = id;
+            document.getElementById('studentNameToDelete').innerText = name;
+
+            // الحصول على مرجع للمودال
+            var myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+            // عرض المودال
+            myModal.show();
         }
-    </tbody>
-</table>
+
+        // تأكيد من تحميل Bootstrap بشكل صحيح
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من وجود Bootstrap
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap غير معرف. يرجى التأكد من تضمين مكتبة Bootstrap بشكل صحيح.');
+            }
+
+            // تفعيل التلميحات
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // تأثير التحويم
+            var studentRows = document.querySelectorAll('.student-row');
+            studentRows.forEach(function(row) {
+                row.addEventListener('mouseenter', function() {
+                    this.classList.add('bg-light');
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.classList.remove('bg-light');
+                });
+            });
+        });
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .card-header {
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+        .btn {
+            border-radius: 5px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background-color: #3f6ad8;
+            border-color: #3f6ad8;
+        }
+        .btn-primary:hover {
+            background-color: #2d4eb1;
+            border-color: #2d4eb1;
+        }
+        .btn-success {
+            background-color: #3ac47d;
+            border-color: #3ac47d;
+        }
+        .btn-success:hover {
+            background-color: #2e9d64;
+            border-color: #2e9d64;
+        }
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+        }
+        .table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .table th {
+            font-weight: 600;
+            background-color: #f1f4f9;
+            border-top: none;
+            padding: 15px;
+        }
+        .table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(63, 106, 216, 0.05);
+        }
+        .modal-content {
+            border-radius: 10px;
+            overflow: hidden;
+            border: none;
+        }
+        .modal-header {
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+        .modal-footer {
+            border-top: none;
+            padding: 15px 20px;
+        }
+        .alert {
+            border-radius: 5px;
+        }
+        .btn-outline-info {
+            color: #3f6ad8;
+            border-color: #3f6ad8;
+        }
+        .btn-outline-info:hover {
+            background-color: #3f6ad8;
+            border-color: #3f6ad8;
+            color: white;
+        }
+        .btn-outline-danger {
+            color: #d92550;
+            border-color: #d92550;
+        }
+        .btn-outline-danger:hover {
+            background-color: #d92550;
+            border-color: #d92550;
+            color: white;
+        }
+        .badge {
+            padding: 0.5em 0.8em;
+            font-weight: 500;
+            border-radius: 5px;
+        }
+    </style>
+}

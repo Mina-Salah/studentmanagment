@@ -107,20 +107,20 @@ namespace StudentManagement.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public async Task<IActionResult> Delete(int id)
-        {
-            var student = await _studentService.GetStudentByIdAsync(id);
-            if (student == null)
-                return NotFound();
-
-            var viewModel = _mapper.Map<StudentFormViewModel>(student);
-            return View(viewModel);
-        }
-
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _studentService.DeleteStudentAsync(id);
+            try
+            {
+                await _studentService.DeleteStudentAsync(id);
+                TempData["SuccessMessage"] = "تم حذف الطالب بنجاح";
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "حدث خطأ أثناء محاولة حذف الطالب";
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

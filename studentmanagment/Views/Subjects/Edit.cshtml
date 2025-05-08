@@ -1,26 +1,125 @@
 ﻿@model StudentManagement.Web.ViewModels.SubjectCheckboxItem
-
 @{
-    ViewData["Title"] = "Edit Subject";
+    ViewData["Title"] = "تعديل مادة";
 }
 
-<h2>Edit Subject</h2>
+<div class="container mt-4">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0"><i class="fas fa-edit me-2"></i>@ViewData["Title"]</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" id="editForm">
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group mb-4">
+                    <label asp-for="Name" class="form-label fw-bold">اسم المادة</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-book"></i></span>
+                        <input asp-for="Name" class="form-control" placeholder="أدخل اسم المادة" autofocus />
+                    </div>
+                    <span asp-validation-for="Name" class="text-danger mt-1 d-block"></span>
+                </div>
 
-<form asp-action="Edit" method="post">
-    <input type="hidden" asp-for="Id" />
-
-    <div class="form-group">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+                <div class="d-flex mt-4">
+                    <button type="submit" class="btn btn-info text-white" id="updateBtn">
+                        <i class="fas fa-save me-1"></i> تحديث
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-times me-1"></i> إلغاء
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
-
-    <button type="submit" class="btn btn-primary">Update</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        $(document).ready(function() {
+            // تأثيرات بصرية عند التركيز على الحقول
+            $('input').focus(function() {
+                $(this).parent().addClass('border-info');
+            }).blur(function() {
+                $(this).parent().removeClass('border-info');
+            });
+
+            // تغيير حالة زر الإرسال عند تقديم النموذج
+            $('#editForm').submit(function() {
+                if ($(this).valid()) {
+                    $('#updateBtn').html('<span class="spinner-border spinner-border-sm me-2"></span> جاري التحديث...');
+                    $('#updateBtn').attr('disabled', true);
+                }
+            });
+
+            // تأثير دخول للنموذج
+            $('.card').addClass('animate__animated animate__fadeIn');
+
+            // تمييز الحقل بتأثير عند التحميل
+            setTimeout(function() {
+                $('input[name="Name"]').addClass('highlight');
+                setTimeout(function() {
+                    $('input[name="Name"]').removeClass('highlight');
+                }, 800);
+            }, 500);
+        });
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .card-header {
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+        .btn {
+            border-radius: 5px;
+            padding: 10px 20px;
+            transition: all 0.3s;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+            border-color: #117a8b;
+            transform: translateY(-2px);
+        }
+        .input-group {
+            border-radius: 5px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .input-group:focus-within {
+            box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+        }
+        .input-group-text {
+            background-color: #f1f4f9;
+            border-right: none;
+        }
+        .form-control {
+            border-left: none;
+        }
+        .form-control:focus {
+            border-color: #ced4da;
+            box-shadow: none;
+        }
+        .highlight {
+            animation: glow 0.8s ease-in-out;
+        }
+        @@keyframes glow {
+            0% { box-shadow: none; }
+            50% { box-shadow: 0 0 10px rgba(23, 162, 184, 0.6); }
+            100% { box-shadow: none; }
+        }
+    </style>
 }
