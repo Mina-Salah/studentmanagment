@@ -1,0 +1,50 @@
+﻿@model List<StudentManagement.Web.ViewModels.StudentFormViewModel>
+
+@{
+    ViewData["Title"] = "Students";
+}
+
+<h2>Students</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">Add New Student</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date Of Birth</th>
+            <th>Address</th>
+            <th>Subjects</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model)
+        {
+            <tr>
+                <td>@student.Name</td>
+                <td>@student.DateOfBirth.ToShortDateString()</td>
+                <td>@student.Address</td>
+                <td>
+                    @if (student.Subjects.Any())
+                    {
+                        <ul>
+                            @foreach (var subject in student.Subjects)
+                            {
+                                <li>@subject</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span>No subjects</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-warning">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@student.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,30 @@
+﻿@model IEnumerable<StudentManagement.Web.ViewModels.SubjectCheckboxItem>
+
+@{
+    ViewData["Title"] = "Subjects List";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(model => model.First().Name)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var subject in Model)
+        {
+            <tr>
+                <td>@subject.Name</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = subject.Id })" class="btn btn-primary">Edit</a>
+                    <a href="@Url.Action("Delete", new { id = subject.Id })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create")" class="btn btn-success">Create New Subject</a>
