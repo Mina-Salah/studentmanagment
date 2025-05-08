@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using StudentManagement.Services.Interfaces;
 
-namespace StudentManagement.Servicess.Implementations
+namespace StudentManagement.Services.Implementations
 
 {
     public class StudentService : IStudentService
