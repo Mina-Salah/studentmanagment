@@ -1,6 +1,6 @@
 ﻿@model StudentManagement.Web.ViewModels.StudentFormViewModel
 @{
-    ViewData["Title"] = "إضافة طالب جديد";
+    ViewData["Title"] = "Add New Student";
 }
 
 <div class="container mt-4">
@@ -13,16 +13,16 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group mb-4">
-                            <label asp-for="Name" class="form-label fw-bold">اسم الطالب</label>
+                            <label asp-for="Name" class="form-label fw-bold">Student Name</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input asp-for="Name" class="form-control" placeholder="أدخل اسم الطالب" />
+                                <input asp-for="Name" class="form-control" placeholder="Enter student name" />
                             </div>
                             <span asp-validation-for="Name" class="text-danger mt-1 d-block"></span>
                         </div>
 
                         <div class="form-group mb-4">
-                            <label asp-for="DateOfBirth" class="form-label fw-bold">تاريخ الميلاد</label>
+                            <label asp-for="DateOfBirth" class="form-label fw-bold">Date of Birth</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
                                 <input asp-for="DateOfBirth" class="form-control" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
@@ -31,10 +31,10 @@
                         </div>
 
                         <div class="form-group mb-4">
-                            <label asp-for="Address" class="form-label fw-bold">العنوان</label>
+                            <label asp-for="Address" class="form-label fw-bold">Address</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-                                <input asp-for="Address" class="form-control" placeholder="أدخل عنوان الطالب" />
+                                <input asp-for="Address" class="form-control" placeholder="Enter student's address" />
                             </div>
                             <span asp-validation-for="Address" class="text-danger mt-1 d-block"></span>
                         </div>
@@ -43,13 +43,13 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label class="form-label fw-bold mb-3">
-                                <i class="fas fa-book me-1"></i> المواد الدراسية
+                                <i class="fas fa-book me-1"></i> Subjects
                             </label>
                             <div class="subjects-container p-3 border rounded bg-light">
                                 @if (!Model.Subjects.Any())
                                 {
                                     <div class="alert alert-info text-center">
-                                        <i class="fas fa-info-circle me-1"></i> لا توجد مواد دراسية متاحة
+                                        <i class="fas fa-info-circle me-1"></i> No available subjects
                                     </div>
                                 }
                                 else
@@ -58,16 +58,18 @@
                                         @for (int i = 0; i < Model.Subjects.Count; i++)
                                         {
                                             <div class="col-md-6 mb-2">
-                                                <div class="form-check subject-checkbox">
-                                                    <input class="form-check-input" type="checkbox"
-                                                           name="Subjects[@i].IsSelected" value="true"
-                                                           id="subject_@Model.Subjects[i].Id"
-                                                    @(Model.Subjects[i].IsSelected ? "checked" : "") />
-                                                    <input type="hidden" name="Subjects[@i].Id" value="@Model.Subjects[i].Id" />
-                                                    <input type="hidden" name="Subjects[@i].Name" value="@Model.Subjects[i].Name" />
-                                                    <label class="form-check-label" for="subject_@Model.Subjects[i].Id">
-                                                        @Model.Subjects[i].Name
-                                                    </label>
+                                                <div class="subject-item p-2 rounded" onclick="toggleCheckbox(this)">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox"
+                                                               name="Subjects[@i].IsSelected" value="true"
+                                                               id="subject_@Model.Subjects[i].Id"
+                                                        @(Model.Subjects[i].IsSelected ? "checked" : "") />
+                                                        <input type="hidden" name="Subjects[@i].Id" value="@Model.Subjects[i].Id" />
+                                                        <input type="hidden" name="Subjects[@i].Name" value="@Model.Subjects[i].Name" />
+                                                        <label class="form-check-label" for="subject_@Model.Subjects[i].Id">
+                                                            @Model.Subjects[i].Name
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         }
@@ -80,10 +82,10 @@
 
                 <div class="d-flex mt-4">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> حفظ
+                        <i class="fas fa-save me-1"></i> Save
                     </button>
                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">
-                        <i class="fas fa-arrow-left me-1"></i> العودة للقائمة
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>
             </form>
@@ -97,24 +99,38 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+        function toggleCheckbox(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                const event = new Event('change');
+                checkbox.dispatchEvent(event);
+
+                // Add visual feedback
+                element.classList.toggle('subject-selected', checkbox.checked);
+            }
+        }
+
         $(document).ready(function () {
-            // إضافة تأثيرات بصرية عند التركيز
+            // Initialize selected state
+            document.querySelectorAll('.subject-item').forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                if (checkbox && checkbox.checked) {
+                    item.classList.add('subject-selected');
+                }
+            });
+
+            // Add visual effects on focus
             $('input').focus(function () {
                 $(this).parent().addClass('border-primary');
             }).blur(function () {
                 $(this).parent().removeClass('border-primary');
             });
 
-            // تأثير التحويم على مربعات الاختيار
-            $('.subject-checkbox').hover(
-                function() { $(this).addClass('bg-white shadow-sm rounded p-1'); },
-                function() { $(this).removeClass('bg-white shadow-sm rounded p-1'); }
-            );
-
-            // تحقق من صحة النموذج عند الإرسال
+            // Form submission with validation
             $('form').submit(function () {
                 if ($(this).valid()) {
-                    $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2"></span> جاري الحفظ...');
+                    $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2"></span> Saving...');
                     $('button[type="submit"]').attr('disabled', true);
                 }
             });
@@ -125,54 +141,78 @@
             background-color: #f8f9fa;
             font-family: 'Tajawal', sans-serif;
         }
+
         .card {
             border-radius: 10px;
             overflow: hidden;
         }
+
         .card-header {
             border-bottom: none;
             padding: 15px 20px;
         }
+
         .btn {
             border-radius: 5px;
             padding: 8px 20px;
             transition: all 0.3s;
         }
+
         .btn-primary {
             background-color: #3f6ad8;
             border-color: #3f6ad8;
         }
+
             .btn-primary:hover {
                 background-color: #2d4eb1;
                 border-color: #2d4eb1;
             }
+
         .input-group {
             border-radius: 5px;
             overflow: hidden;
             transition: all 0.3s;
         }
+
             .input-group:focus-within {
                 box-shadow: 0 0 0 0.2rem rgba(63, 106, 216, 0.25);
             }
+
         .input-group-text {
             background-color: #f1f4f9;
             border-right: none;
         }
+
         .form-control {
             border-left: none;
         }
+
             .form-control:focus {
                 border-color: #ced4da;
                 box-shadow: none;
             }
+
         .subjects-container {
             max-height: 300px;
             overflow-y: auto;
         }
-        .subject-checkbox {
-            transition: all 0.2s;
+
+        .subject-item {
             cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
+
+            .subject-item:hover {
+                background-color: #f0f5ff;
+                border-color: #d0ddf0;
+            }
+
+            .subject-item.subject-selected {
+                background-color: #e0ebff;
+                border-color: #3f6ad8;
+            }
+
         .form-check-input:checked + label {
             font-weight: bold;
             color: #3f6ad8;

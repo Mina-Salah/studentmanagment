@@ -43,9 +43,11 @@ namespace StudentManagement.Services.Implementations
             var subject = await _unitOfWork.Subjects.GetByIdAsync(id);
             if (subject != null)
             {
-                _unitOfWork.Subjects.Delete(subject);
+                subject.IsDeleted = true; // Soft Delete
+                _unitOfWork.Subjects.Update(subject);
                 await _unitOfWork.CompleteAsync();
             }
         }
+
     }
 }

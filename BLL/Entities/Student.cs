@@ -12,6 +12,8 @@ namespace StudentManagement.Core.Entities
         public string Name { get; set; }
         public DateTime DateOfBirth { get; set; }
         public string Address { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
         public virtual ICollection<StudentSubject> StudentSubjects { get; set; }
     }
 

@@ -6,15 +6,15 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
-	<meta name="author" content="AdminKit">
-	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
+	<meta name="author" content="Student Managment">
+	<meta name="keywords" content="Student Managment, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
 
 	<link rel="preconnect" href="https://fonts.gstatic.com">
 	<link rel="shortcut icon" href="img/icons/icon-48x48.png" />
 
-	<link rel="canonical" href="https://demo-basic.adminkit.io/" />
+	<link rel="canonical" href="https://demo-basic.Student Managment.io/" />
 
-	<title>Admin Demo</title>
+	<title>Student Managment</title>
 
 	<link href="~/DashoardAssets/css/app.css" rel="stylesheet">
 	<!-- ضع هذه الأكواد في head -->
@@ -22,6 +22,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 	<!-- استايلات إضافية للموقع -->
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+	@RenderSection("Styles", required: false)
 </head>
 
 <body>
@@ -29,7 +30,7 @@
 		<nav id="sidebar" class="sidebar js-sidebar">
 			<div class="sidebar-content js-simplebar">
 				<a class="sidebar-brand" href="index.html">
-					<span class="align-middle">AdminKit</span>
+					<span class="align-middle">Student Managment</span>
 				</a>
 
 				<ul class="sidebar-nav">
@@ -42,8 +43,6 @@
 							<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Dashboard</span>
 						</a>
 					</li>
-
-					
 					<li class="sidebar-item">
 						<a class="sidebar-link" asp-controller="Students" asp-action="Index">
 							<i class="align-middle" data-feather="grid"></i> <span class="align-middle">Students</span>
@@ -54,23 +53,25 @@
 							<i class="align-middle" data-feather="grid"></i> <span class="align-middle">Subject</span>
 						</a>
 					</li>
-
-
+				<</ul>/>
 
 			</div>
 		</nav>
 
 		<div class="main">
 			<nav class="navbar navbar-expand navbar-light navbar-bg">
-				<a class="sidebar-toggle js-sidebar-toggle">
-					<i class="hamburger align-self-center"></i>
-				</a>
+				<div class="container-fluid d-flex justify-content-between align-items-center">
+					<a class="sidebar-toggle js-sidebar-toggle">
+						<i class="hamburger align-self-center"></i>
+					</a>
 
-				<div class="navbar-collapse collapse">
-					
+					<form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+						<button type="submit" class="btn btn-outline-danger">
+							<i class="fas fa-sign-out-alt"></i> خروج
+						</button>
+					</form>
 				</div>
 			</nav>
-
 			<main class="content">
 				@RenderBody()
 			</main>
@@ -80,22 +81,22 @@
 					<div class="row text-muted">
 						<div class="col-6 text-start">
 							<p class="mb-0">
-								<a class="text-muted" href="https://adminkit.io/" target="_blank"><strong>AdminKit</strong></a> - <a class="text-muted" href="https://adminkit.io/" target="_blank"><strong>Bootstrap Admin Template</strong></a>								&copy;
+								<a class="text-muted" href="https://Student Managment.io/" target="_blank"><strong>Student Managment</strong></a> - <a class="text-muted" href="https://Student Managment.io/" target="_blank"><strong>Bootstrap Admin Template</strong></a>								&copy;
 							</p>
 						</div>
 						<div class="col-6 text-end">
 							<ul class="list-inline">
 								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Support</a>
+									<a class="text-muted" href="https://Student Managment.io/" target="_blank">Support</a>
 								</li>
 								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Help Center</a>
+									<a class="text-muted" href="https://Student Managment.io/" target="_blank">Help Center</a>
 								</li>
 								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Privacy</a>
+									<a class="text-muted" href="https://Student Managment.io/" target="_blank">Privacy</a>
 								</li>
 								<li class="list-inline-item">
-									<a class="text-muted" href="https://adminkit.io/" target="_blank">Terms</a>
+									<a class="text-muted" href="https://Student Managment.io/" target="_blank">Terms</a>
 								</li>
 							</ul>
 						</div>

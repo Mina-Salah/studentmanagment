@@ -9,6 +9,7 @@ namespace StudentManagement.Core.Interfaces
         IGenericRepository<Student> Students { get; }
         IGenericRepository<Subject> Subjects { get; }
         IGenericRepository<StudentSubject> StudentSubjects { get; }
+        IGenericRepository<User> Users { get; }
         Task<int> CompleteAsync(); // Equivalent to SaveChangesAsync
     }
 }

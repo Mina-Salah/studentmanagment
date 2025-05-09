@@ -6,9 +6,12 @@ using StudentManagement.Web.ViewModels;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using StudentManagement.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Web.Controllers
 {
+    [Authorize]
+
     public class SubjectsController : Controller
     {
         private readonly ISubjectService _subjectService;

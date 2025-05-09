@@ -16,11 +16,13 @@ namespace StudentManagement.Data.UnitOfWork
             Students = new GenericRepository<Student>(_context);
             Subjects = new GenericRepository<Subject>(_context);
             StudentSubjects = new GenericRepository<StudentSubject>(_context);
+            Users = new GenericRepository<User>(_context);
         }
 
         public IGenericRepository<Student> Students { get; private set; }
         public IGenericRepository<Subject> Subjects { get; private set; }
         public IGenericRepository<StudentSubject> StudentSubjects { get; private set; }
+        public IGenericRepository<User> Users { get; private set; } // أضف هذا السطر
 
         public async Task<int> CompleteAsync()
         {

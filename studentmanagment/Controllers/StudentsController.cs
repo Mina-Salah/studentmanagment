@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Core.Entities;
 using StudentManagement.Core.Interfaces;
@@ -7,6 +8,8 @@ using StudentManagement.Web.ViewModels;
 
 namespace StudentManagement.Web.Controllers
 {
+    [Authorize]
+
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;

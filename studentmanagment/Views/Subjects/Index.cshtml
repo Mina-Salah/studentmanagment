@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<StudentManagement.Web.ViewModels.SubjectCheckboxItem>
 @{
-    ViewData["Title"] = "قائمة المواد الدراسية";
+    ViewData["Title"] = "Subject List";
 }
 
 <div class="container mt-4">
@@ -11,7 +11,7 @@
         <div class="card-body">
             <div class="d-flex justify-content-end mb-4">
                 <a asp-action="Create" class="btn btn-success">
-                    <i class="fas fa-plus-circle me-1"></i> إضافة مادة جديدة
+                    <i class="fas fa-plus-circle me-1"></i> Add New Subject
                 </a>
             </div>
 
@@ -19,8 +19,8 @@
             {
                 <div class="alert alert-info text-center p-4">
                     <i class="fas fa-info-circle fa-2x mb-3"></i>
-                    <h5>لا توجد مواد مسجلة حالياً</h5>
-                    <p class="mb-0">قم بإضافة مواد جديدة باستخدام زر "إضافة مادة جديدة"</p>
+                    <h5>No subjects are currently registered</h5>
+                    <p class="mb-0">Add new subjects using the "Add New Subject" button</p>
                 </div>
             }
             else
@@ -33,7 +33,7 @@
                                     <i class="fas fa-book me-1 text-primary"></i>
                                     @Html.DisplayNameFor(model => model.First().Name)
                                 </th>
-                                <th scope="col" class="text-center">الإجراءات</th>
+                                <th scope="col" class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -43,11 +43,11 @@
                                     <td class="align-middle fw-bold">@item.Name</td>
                                     <td class="text-center">
                                         <div class="btn-group" role="group">
-                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip" title="تعديل">
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip" title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger"
-                                               onclick="showDeleteModal(@item.Id, '@item.Name')" data-bs-toggle="tooltip" title="حذف">
+                                               onclick="showDeleteModal(@item.Id, '@item.Name')" data-bs-toggle="tooltip" title="Delete">
                                                 <i class="fas fa-trash-alt"></i>
                                             </a>
                                         </div>
@@ -62,31 +62,31 @@
     </div>
 </div>
 
-<!-- نافذة تأكيد الحذف المنبثقة -->
+<!-- Delete confirmation modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
                 <h5 class="modal-title" id="deleteModalLabel">
-                    <i class="fas fa-trash-alt me-2"></i> تأكيد الحذف
+                    <i class="fas fa-trash-alt me-2"></i> Delete Confirmation
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    هل أنت متأكد من رغبتك في حذف مادة "<strong id="subjectNameToDelete"></strong>"؟
+                    Are you sure you want to delete the subject "<strong id="subjectNameToDelete"></strong>"?
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> إلغاء
+                    <i class="fas fa-times me-1"></i> Cancel
                 </button>
                 <form id="deleteForm" asp-action="DeleteConfirmed" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" id="subjectIdToDelete" name="id" value="" />
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash-alt me-1"></i> تأكيد الحذف
+                        <i class="fas fa-trash-alt me-1"></i> Confirm Deletion
                     </button>
                 </form>
             </div>
@@ -97,33 +97,33 @@
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
-        // دالة لعرض مودال الحذف
+        // Function to show the delete modal
         function showDeleteModal(id, name) {
-            // تعيين القيم في المودال
+            // Set values in the modal
             document.getElementById('subjectIdToDelete').value = id;
             document.getElementById('subjectNameToDelete').innerText = name;
 
-            // الحصول على مرجع للمودال
+            // Get a reference to the modal
             var myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
 
-            // عرض المودال
+            // Show the modal
             myModal.show();
         }
 
-        // تأكيد من تحميل Bootstrap بشكل صحيح
+        // Confirm Bootstrap loaded correctly
         document.addEventListener('DOMContentLoaded', function () {
-            // التحقق من وجود Bootstrap
+            // Check if Bootstrap is defined
             if (typeof bootstrap === 'undefined') {
-                console.error('Bootstrap غير معرف. يرجى التأكد من تضمين مكتبة Bootstrap بشكل صحيح.');
+                console.error('Bootstrap is not defined. Please ensure Bootstrap library is included correctly.');
             }
 
-            // تفعيل التلميحات
+            // Enable tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // تأثير التحويم
+            // Hover effect
             var subjectRows = document.querySelectorAll('.subject-row');
             subjectRows.forEach(function (row) {
                 row.addEventListener('mouseenter', function () {
