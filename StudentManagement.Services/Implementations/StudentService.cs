@@ -41,7 +41,9 @@ namespace StudentManagement.Services.Implementations
         public async Task<IEnumerable<Student>> GetAllStudentsAsync()
         {
             return await _unitOfWork.Students.GetAllAsync(q =>
-                q.Include(s => s.StudentSubjects).ThenInclude(ss => ss.Subject));
+                q.Where(s => !s.IsDeleted)
+                 .Include(s => s.StudentSubjects)
+                 .ThenInclude(ss => ss.Subject));
         }
 
         public async Task<Student?> GetStudentByIdAsync(int id)
@@ -85,8 +87,10 @@ namespace StudentManagement.Services.Implementations
             if (student == null)
                 throw new Exception("Student not found");
 
-            _unitOfWork.Students.Delete(student);
+            student.IsDeleted = true;
+            _unitOfWork.Students.Update(student);
             await _unitOfWork.CompleteAsync();
         }
+
     }
 }

@@ -11,7 +11,7 @@ namespace StudentManagement.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        private const string AdminEmail = "admin@example.com";
+        private const string AdminEmail = "Mina@gmail.com";
         private const string AdminPassword = "Admin1412";
 
         public AuthService(IUnitOfWork unitOfWork)

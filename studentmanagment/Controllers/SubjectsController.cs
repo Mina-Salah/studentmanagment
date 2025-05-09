@@ -110,19 +110,25 @@ namespace StudentManagement.Web.Controllers
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> DeleteConfirmed(int id)
-		{
-			try
-			{
-				await _subjectService.DeleteSubjectAsync(id);
-				TempData["SuccessMessage"] = "تم حذف المادة بنجاح";
-			}
-			catch
-			{
-				TempData["ErrorMessage"] = "حدث خطأ أثناء محاولة حذف المادة";
-			}
 
-			return RedirectToAction(nameof(Index));
-		}
-	}
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                await _subjectService.DeleteSubjectAsync(id);
+                TempData["SuccessMessage"] = "تم حذف المادة بنجاح";
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "حدث خطأ أثناء محاولة حذف المادة";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+    }
 }

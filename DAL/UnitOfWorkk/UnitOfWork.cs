@@ -22,7 +22,7 @@ namespace StudentManagement.Data.UnitOfWork
         public IGenericRepository<Student> Students { get; private set; }
         public IGenericRepository<Subject> Subjects { get; private set; }
         public IGenericRepository<StudentSubject> StudentSubjects { get; private set; }
-        public IGenericRepository<User> Users { get; private set; } // أضف هذا السطر
+        public IGenericRepository<User> Users { get; private set; } 
 
         public async Task<int> CompleteAsync()
         {

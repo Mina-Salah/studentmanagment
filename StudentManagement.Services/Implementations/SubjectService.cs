@@ -41,13 +41,23 @@ namespace StudentManagement.Services.Implementations
         public async Task DeleteSubjectAsync(int id)
         {
             var subject = await _unitOfWork.Subjects.GetByIdAsync(id);
-            if (subject != null)
+            if (subject == null)
+                return;
+
+            var isRelated = (await _unitOfWork.StudentSubjects
+                .GetAllAsync(s => s.Where(ss => ss.SubjectId == id))).Any();
+
+            if (isRelated)
             {
-                subject.IsDeleted = true; // Soft Delete
-                _unitOfWork.Subjects.Update(subject);
-                await _unitOfWork.CompleteAsync();
+                throw new InvalidOperationException("لا يمكن حذف مادة مرتبطة بكورس.");
             }
+
+            // Soft Delete
+            subject.IsDeleted = true;
+            _unitOfWork.Subjects.Update(subject);
+            await _unitOfWork.CompleteAsync();
         }
+
 
     }
 }
