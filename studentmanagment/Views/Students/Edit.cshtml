@@ -5,7 +5,7 @@
 
 <div class="container mt-4">
     <div class="card border-0 shadow">
-        <div class="card-header bg-warning text-white">
+        <div class="card-header bg-primary text-white">
             <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i>@ViewData["Title"] - @Model.Name</h3>
         </div>
         <div class="card-body">
@@ -46,7 +46,6 @@
                         <div class="form-group">
                             <label class="form-label fw-bold mb-3">
                                 <i class="fas fa-book me-1"></i> Subjects
-                                <span class="badge bg-info ms-2">@Model.Subjects.Count(s => s.IsSelected) Subject(s) Selected</span>
                             </label>
                             <div class="subjects-container p-3 border rounded bg-light">
                                 @if (!Model.Subjects.Any())
@@ -60,17 +59,21 @@
                                     <div class="row">
                                         @for (int i = 0; i < Model.Subjects.Count; i++)
                                         {
+                                            var subject = Model.Subjects[i];
+                                            var isSelected = subject.IsSelected ? "subject-selected" : "";
                                             <div class="col-md-6 mb-2">
-                                                <div class="form-check subject-checkbox @(Model.Subjects[i].IsSelected ? "selected" : "")">
-                                                    <input class="form-check-input" type="checkbox"
-                                                           name="Subjects[@i].IsSelected" value="true"
-                                                           id="subject_@Model.Subjects[i].Id"
-                                                    @(Model.Subjects[i].IsSelected ? "checked" : "") />
-                                                    <input type="hidden" name="Subjects[@i].Id" value="@Model.Subjects[i].Id" />
-                                                    <input type="hidden" name="Subjects[@i].Name" value="@Model.Subjects[i].Name" />
-                                                    <label class="form-check-label" for="subject_@Model.Subjects[i].Id">
-                                                        @Model.Subjects[i].Name
-                                                    </label>
+                                                <div class="subject-item p-2 rounded @isSelected" onclick="toggleCheckbox(this)">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox"
+                                                               name="Subjects[@i].IsSelected" value="true"
+                                                               id="subject_@subject.Id"
+                                                        @(subject.IsSelected ? "checked" : "") />
+                                                        <input type="hidden" name="Subjects[@i].Id" value="@subject.Id" />
+                                                        <input type="hidden" name="Subjects[@i].Name" value="@subject.Name" />
+                                                        <label class="form-check-label" for="subject_@subject.Id">
+                                                            @subject.Name
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         }
@@ -82,7 +85,7 @@
                 </div>
 
                 <div class="d-flex mt-4">
-                    <button type="submit" class="btn btn-warning text-white">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-1"></i> Save Changes
                     </button>
                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">
@@ -96,38 +99,32 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
     <script>
+        function toggleCheckbox(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                const event = new Event('change');
+                checkbox.dispatchEvent(event);
+                element.classList.toggle('subject-selected', checkbox.checked);
+            }
+        }
+
         $(document).ready(function () {
-            // Add visual effects when focusing on input fields
-            $('input').focus(function () {
-                $(this).parent().addClass('border-warning');
-            }).blur(function () {
-                $(this).parent().removeClass('border-warning');
-            });
-
-            // Hover effect on subject checkboxes
-            $('.subject-checkbox').hover(
-                function () { $(this).addClass('bg-white shadow-sm rounded p-1'); },
-                function () { $(this).removeClass('bg-white shadow-sm rounded p-1'); }
-            );
-
-            // Handle checkbox selection change
-            $('.form-check-input').change(function () {
-                if ($(this).is(':checked')) {
-                    $(this).closest('.subject-checkbox').addClass('selected');
-                } else {
-                    $(this).closest('.subject-checkbox').removeClass('selected');
+            $('.subject-item').each(function () {
+                const checkbox = $(this).find('input[type="checkbox"]')[0];
+                if (checkbox.checked) {
+                    $(this).addClass('subject-selected');
                 }
-
-                // Update the count of selected subjects
-                var selectedCount = $('.form-check-input:checked').length;
-                $('.badge.bg-info').text(selectedCount + ' Subject(s) Selected');
             });
 
-            // Validate the form before submission
+            $('input').focus(function () {
+                $(this).parent().addClass('border-primary');
+            }).blur(function () {
+                $(this).parent().removeClass('border-primary');
+            });
+
             $('form').submit(function () {
                 if ($(this).valid()) {
                     $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2"></span> Saving...');
@@ -150,7 +147,7 @@
         .card-header {
             border-bottom: none;
             padding: 15px 20px;
-            background-color: #f7b924 !important;
+            background-color: #3f6ad8 !important;
         }
 
         .btn {
@@ -159,14 +156,14 @@
             transition: all 0.3s;
         }
 
-        .btn-warning {
-            background-color: #f7b924;
-            border-color: #f7b924;
+        .btn-primary {
+            background-color: #3f6ad8;
+            border-color: #3f6ad8;
         }
 
-            .btn-warning:hover {
-                background-color: #e5a91f;
-                border-color: #e5a91f;
+            .btn-primary:hover {
+                background-color: #2d4eb1;
+                border-color: #2d4eb1;
             }
 
         .input-group {
@@ -176,11 +173,11 @@
         }
 
             .input-group:focus-within {
-                box-shadow: 0 0 0 0.2rem rgba(247, 185, 36, 0.25);
+                box-shadow: 0 0 0 0.2rem rgba(63, 106, 216, 0.25);
             }
 
         .input-group-text {
-            background-color: #f8f1d5;
+            background-color: #f1f4f9;
             border-right: none;
         }
 
@@ -198,26 +195,25 @@
             overflow-y: auto;
         }
 
-        .subject-checkbox {
-            transition: all 0.2s;
+        .subject-item {
             cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
         }
 
-            .subject-checkbox.selected {
-                background-color: #f8f1d5;
-                border-radius: 5px;
-                padding: 5px;
+            .subject-item:hover {
+                background-color: #f0f5ff;
+                border-color: #d0ddf0;
+            }
+
+            .subject-item.subject-selected {
+                background-color: #e0ebff;
+                border-color: #3f6ad8;
             }
 
         .form-check-input:checked + label {
             font-weight: bold;
-            color: #f7b924;
-        }
-
-        .badge {
-            padding: 0.5em 0.8em;
-            font-weight: 500;
-            border-radius: 5px;
+            color: #3f6ad8;
         }
     </style>
 }

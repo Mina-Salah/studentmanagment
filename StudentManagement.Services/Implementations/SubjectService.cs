@@ -1,4 +1,5 @@
 ﻿// SubjectService.cs
+using Microsoft.EntityFrameworkCore;
 using StudentManagement.Core.Entities;
 using StudentManagement.Core.Interfaces;
 using StudentManagement.Services.Interfaces;
@@ -40,20 +41,16 @@ namespace StudentManagement.Services.Implementations
 
         public async Task DeleteSubjectAsync(int id)
         {
-            var subject = await _unitOfWork.Subjects.GetByIdAsync(id);
+            var subject = await _unitOfWork.Subjects.GetByIdAsync(id, q =>
+                q.Include(s => s.StudentSubjects)); // تأكد من تحميل العلاقات
+
             if (subject == null)
-                return;
+                throw new Exception("Subject not found");
 
-            var isRelated = (await _unitOfWork.StudentSubjects
-                .GetAllAsync(s => s.Where(ss => ss.SubjectId == id))).Any();
+            if (subject.StudentSubjects != null && subject.StudentSubjects.Any())
+                throw new InvalidOperationException("لا يمكن حذف هذه المادة لأنها مرتبطة بطلاب.");
 
-            if (isRelated)
-            {
-                throw new InvalidOperationException("لا يمكن حذف مادة مرتبطة بكورس.");
-            }
-
-            // Soft Delete
-            subject.IsDeleted = true;
+            subject.IsDeleted = true; // Soft delete
             _unitOfWork.Subjects.Update(subject);
             await _unitOfWork.CompleteAsync();
         }

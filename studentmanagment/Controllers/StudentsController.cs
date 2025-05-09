@@ -56,7 +56,6 @@ namespace StudentManagement.Web.Controllers
             };
             return View(viewModel);
         }
-
         [HttpPost]
         public async Task<IActionResult> Create(StudentFormViewModel model)
         {
@@ -65,15 +64,16 @@ namespace StudentManagement.Web.Controllers
 
             var student = _mapper.Map<Student>(model);
 
-            var selectedSubjectIds = model.Subjects
+            // تحقق إذا كانت المواد فارغة أو لا يوجد مواد مختارة
+            var selectedSubjectIds = model.Subjects?
                 .Where(s => s.IsSelected)
                 .Select(s => s.Id)
-                .ToList();
+                .ToList() ?? new List<int>();  // إذا كانت فارغة، يتم تحديد قائمة فارغة
 
+            // إنشاء الطالب حتى لو لم يتم اختيار مواد
             await _studentService.CreateStudentAsync(student, selectedSubjectIds);
             return RedirectToAction(nameof(Index));
         }
-
         public async Task<IActionResult> Edit(int id)
         {
             var student = await _studentService.GetStudentByIdAsync(id);
@@ -94,10 +94,22 @@ namespace StudentManagement.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(StudentFormViewModel model)
         {
             if (!ModelState.IsValid)
+            {
+                // إعادة تحميل المواد عند فشل النموذج
+                var allSubjects = await _unitOfWork.Subjects.GetAllAsync();
+                model.Subjects = allSubjects.Select(s => new SubjectCheckboxItem
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    IsSelected = model.Subjects?.Any(ms => ms.Id == s.Id && ms.IsSelected) == true
+                }).ToList();
+
                 return View(model);
+            }
 
             var student = _mapper.Map<Student>(model);
 
@@ -106,9 +118,55 @@ namespace StudentManagement.Web.Controllers
                 .Select(s => s.Id)
                 .ToList();
 
-            await _studentService.UpdateStudentAsync(model.Id, student, selectedSubjectIds);
+            try
+            {
+                await _studentService.UpdateStudentAsync(model.Id, student, selectedSubjectIds);
+                TempData["SuccessMessage"] = "تم تعديل بيانات الطالب بنجاح";
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "حدث خطأ أثناء تعديل بيانات الطالب";
+            }
+
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> Deleted()
+        {
+            var students = await _studentService.GetDeletedStudentsAsync();
+
+            var viewModels = students.Select(s =>
+            {
+                var vm = _mapper.Map<StudentFormViewModel>(s);
+                vm.Subjects = s.StudentSubjects.Select(ss => new SubjectCheckboxItem
+                {
+                    Id = ss.SubjectId,
+                    Name = ss.Subject.Name,
+                    IsSelected = true
+                }).ToList();
+                return vm;
+            }).ToList();
+
+            return View(viewModels);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            try
+            {
+                await _studentService.RestoreStudentAsync(id);
+                TempData["SuccessMessage"] = "تم استرجاع الطالب بنجاح";
+            }
+            catch
+            {
+                TempData["ErrorMessage"] = "حدث خطأ أثناء محاولة استرجاع الطالب";
+            }
+
+            return RedirectToAction(nameof(Deleted));
+        }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

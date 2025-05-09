@@ -11,5 +11,7 @@ namespace StudentManagement.Services.Interfaces
         Task<Student?> GetStudentByIdAsync(int id);
         Task UpdateStudentAsync(int id, Student student, List<int> subjectIds);
         Task DeleteStudentAsync(int id);
+        Task<IEnumerable<Student>> GetDeletedStudentsAsync();
+        Task RestoreStudentAsync(int id);
     }
 }

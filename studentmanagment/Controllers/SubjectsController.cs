@@ -100,6 +100,10 @@ namespace StudentManagement.Web.Controllers
                 await _subjectService.DeleteSubjectAsync(id);
                 result = new { success = true, message = "تم حذف المادة بنجاح" };
             }
+            catch (InvalidOperationException ex)
+            {
+                result = new { success = false, message = ex.Message };
+            }
             catch
             {
                 result = new { success = false, message = "حدث خطأ أثناء محاولة حذف المادة" };
@@ -108,9 +112,9 @@ namespace StudentManagement.Web.Controllers
             return Json(result);
         }
 
-		[HttpPost]
-		[ValidateAntiForgeryToken]
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try

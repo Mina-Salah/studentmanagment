@@ -91,6 +91,24 @@ namespace StudentManagement.Services.Implementations
             _unitOfWork.Students.Update(student);
             await _unitOfWork.CompleteAsync();
         }
+        public async Task<IEnumerable<Student>> GetDeletedStudentsAsync()
+        {
+            return await _unitOfWork.Students.GetAllAsync(q =>
+                q.Where(s => s.IsDeleted)
+                 .Include(s => s.StudentSubjects)
+                 .ThenInclude(ss => ss.Subject));
+        }
+
+        public async Task RestoreStudentAsync(int id)
+        {
+            var student = await _unitOfWork.Students.GetByIdAsync(id);
+            if (student == null)
+                throw new Exception("Student not found");
+
+            student.IsDeleted = false;
+            _unitOfWork.Students.Update(student);
+            await _unitOfWork.CompleteAsync();
+        }
 
     }
 }
