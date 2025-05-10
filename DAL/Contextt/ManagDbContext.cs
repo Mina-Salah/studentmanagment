@@ -15,8 +15,8 @@ namespace StudentManagement.Data.Contextt
 
         public DbSet<Student> Students { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-/*        public DbSet<StudentSubject> StudentSubjects { get; set; }
-*/        public DbSet<User> users { get; set; }
+        public DbSet<StudentSubject> StudentSubjects { get; set; }
+        public DbSet<User> users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

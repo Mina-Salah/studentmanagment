@@ -5,7 +5,7 @@
 
 <div class="container mt-4">
     <div class="card border-0 shadow">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-warning text-white">
             <h3 class="mb-0"><i class="fas fa-user-edit me-2"></i>@ViewData["Title"] - @Model.Name</h3>
         </div>
         <div class="card-body">
@@ -85,7 +85,7 @@
                 </div>
 
                 <div class="d-flex mt-4">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-warning text-white">
                         <i class="fas fa-save me-1"></i> Save Changes
                     </button>
                     <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">
@@ -120,9 +120,9 @@
             });
 
             $('input').focus(function () {
-                $(this).parent().addClass('border-primary');
+                $(this).parent().addClass('border-warning');
             }).blur(function () {
-                $(this).parent().removeClass('border-primary');
+                $(this).parent().removeClass('border-warning');
             });
 
             $('form').submit(function () {
@@ -147,7 +147,7 @@
         .card-header {
             border-bottom: none;
             padding: 15px 20px;
-            background-color: #3f6ad8 !important;
+            background-color: #f0ad4e !important;
         }
 
         .btn {
@@ -156,14 +156,14 @@
             transition: all 0.3s;
         }
 
-        .btn-primary {
-            background-color: #3f6ad8;
-            border-color: #3f6ad8;
+        .btn-warning {
+            background-color: #f0ad4e;
+            border-color: #f0ad4e;
         }
 
-            .btn-primary:hover {
-                background-color: #2d4eb1;
-                border-color: #2d4eb1;
+            .btn-warning:hover {
+                background-color: #ec971f;
+                border-color: #ec971f;
             }
 
         .input-group {
@@ -173,7 +173,7 @@
         }
 
             .input-group:focus-within {
-                box-shadow: 0 0 0 0.2rem rgba(63, 106, 216, 0.25);
+                box-shadow: 0 0 0 0.2rem rgba(240, 173, 78, 0.25);
             }
 
         .input-group-text {
@@ -202,18 +202,18 @@
         }
 
             .subject-item:hover {
-                background-color: #f0f5ff;
-                border-color: #d0ddf0;
+                background-color: #fdf0dc;
+                border-color: #f7c678;
             }
 
             .subject-item.subject-selected {
-                background-color: #e0ebff;
-                border-color: #3f6ad8;
+                background-color: #fce9d3;
+                border-color: #f0ad4e;
             }
 
         .form-check-input:checked + label {
             font-weight: bold;
-            color: #3f6ad8;
+            color: #ec971f;
         }
     </style>
 }
