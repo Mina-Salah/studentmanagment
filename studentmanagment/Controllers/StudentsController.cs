@@ -8,14 +8,14 @@ using StudentManagement.Web.ViewModels;
 
 namespace StudentManagement.Web.Controllers
 {
-    [Authorize]
-
+    [Authorize] // Restricts access to authenticated users only
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
+        // Constructor injecting 
         public StudentsController(IStudentService studentService, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _studentService = studentService;
@@ -23,10 +23,13 @@ namespace StudentManagement.Web.Controllers
             _mapper = mapper;
         }
 
+        // GET: /Students
         public async Task<IActionResult> Index()
         {
+            // Retrieve all students
             var students = await _studentService.GetAllStudentsAsync();
 
+            // Map student entities to view models and include their selected subjects
             var viewModels = students.Select(s =>
             {
                 var vm = _mapper.Map<StudentFormViewModel>(s);
@@ -42,8 +45,10 @@ namespace StudentManagement.Web.Controllers
             return View(viewModels);
         }
 
+        // GET: /Students/Create
         public async Task<IActionResult> Create()
         {
+            // Get all subjects ....  checkboxes
             var subjects = await _unitOfWork.Subjects.GetAllAsync();
             var viewModel = new StudentFormViewModel
             {
@@ -56,32 +61,41 @@ namespace StudentManagement.Web.Controllers
             };
             return View(viewModel);
         }
+
+        // POST: /Students/Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StudentFormViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
+            // Map the view model to a Student entity
             var student = _mapper.Map<Student>(model);
 
-            // تحقق إذا كانت المواد فارغة أو لا يوجد مواد مختارة
+            // Get selected subject IDs or empty list if none selected
             var selectedSubjectIds = model.Subjects?
                 .Where(s => s.IsSelected)
                 .Select(s => s.Id)
-                .ToList() ?? new List<int>();  // إذا كانت فارغة، يتم تحديد قائمة فارغة
+                .ToList() ?? new List<int>();
 
-            // إنشاء الطالب حتى لو لم يتم اختيار مواد
+            // Create the student with selected subjects
             await _studentService.CreateStudentAsync(student, selectedSubjectIds);
             return RedirectToAction(nameof(Index));
         }
+
+        // GET: /Students/Edit/{id}
         public async Task<IActionResult> Edit(int id)
         {
+            // Retrieve the student to edit
             var student = await _studentService.GetStudentByIdAsync(id);
             if (student == null)
                 return NotFound();
 
+            // Map entity to view model
             var viewModel = _mapper.Map<StudentFormViewModel>(student);
 
+            // Load all subjects and mark those already assigned to student
             var allSubjects = await _unitOfWork.Subjects.GetAllAsync();
             viewModel.Subjects = allSubjects.Select(s => new SubjectCheckboxItem
             {
@@ -93,13 +107,14 @@ namespace StudentManagement.Web.Controllers
             return View(viewModel);
         }
 
+        // POST: /Students/Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(StudentFormViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                // إعادة تحميل المواد عند فشل النموذج
+                // Reload subjects if validation fails
                 var allSubjects = await _unitOfWork.Subjects.GetAllAsync();
                 model.Subjects = allSubjects.Select(s => new SubjectCheckboxItem
                 {
@@ -111,8 +126,10 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
             }
 
+            // Map the view model to a Student entity
             var student = _mapper.Map<Student>(model);
 
+            // Get selected subject IDs
             var selectedSubjectIds = model.Subjects
                 .Where(s => s.IsSelected)
                 .Select(s => s.Id)
@@ -120,21 +137,25 @@ namespace StudentManagement.Web.Controllers
 
             try
             {
+                // Update the student
                 await _studentService.UpdateStudentAsync(model.Id, student, selectedSubjectIds);
-                TempData["SuccessMessage"] = "تم تعديل بيانات الطالب بنجاح";
+                TempData["SuccessMessage"] = "Student updated successfully";
             }
             catch
             {
-                TempData["ErrorMessage"] = "حدث خطأ أثناء تعديل بيانات الطالب";
+                TempData["ErrorMessage"] = "An error occurred while updating the student";
             }
 
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: /Students/Deleted
         public async Task<IActionResult> Deleted()
         {
+            // Get soft-deleted students
             var students = await _studentService.GetDeletedStudentsAsync();
 
+            // Map to view models and include their subjects
             var viewModels = students.Select(s =>
             {
                 var vm = _mapper.Map<StudentFormViewModel>(s);
@@ -150,36 +171,39 @@ namespace StudentManagement.Web.Controllers
             return View(viewModels);
         }
 
+        // POST: /Students/Restore
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int id)
         {
             try
             {
+                // Restore soft-deleted student
                 await _studentService.RestoreStudentAsync(id);
-                TempData["SuccessMessage"] = "تم استرجاع الطالب بنجاح";
+                TempData["SuccessMessage"] = "Student restored successfully";
             }
             catch
             {
-                TempData["ErrorMessage"] = "حدث خطأ أثناء محاولة استرجاع الطالب";
+                TempData["ErrorMessage"] = "An error occurred while restoring the student";
             }
 
             return RedirectToAction(nameof(Deleted));
         }
 
-
+        // POST: /Students/DeleteConfirmed
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
             {
+                // Soft-delete student
                 await _studentService.DeleteStudentAsync(id);
-                TempData["SuccessMessage"] = "تم حذف الطالب بنجاح";
+                TempData["SuccessMessage"] = "Student deleted successfully";
             }
             catch
             {
-                TempData["ErrorMessage"] = "حدث خطأ أثناء محاولة حذف الطالب";
+                TempData["ErrorMessage"] = "An error occurred while deleting the student";
             }
 
             return RedirectToAction(nameof(Index));
