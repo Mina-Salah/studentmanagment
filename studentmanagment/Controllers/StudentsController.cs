@@ -8,7 +8,7 @@ using StudentManagement.Web.ViewModels;
 
 namespace StudentManagement.Web.Controllers
 {
-    [Authorize] // Restricts access to authenticated users only
+    [Authorize(Roles = "Admin")]
     public class StudentsController : Controller
     {
         private readonly IStudentService _studentService;

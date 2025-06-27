@@ -1,0 +1,10 @@
+﻿@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<h2>مرحبًا بك في لوحة تحكم الطالب</h2>
+
+<div class="mt-4">
+    <a class="btn btn-info" href="@Url.Action("Index", "Courses")">عرض الكورسات</a>
+    <a class="btn btn-secondary" href="@Url.Action("MyCourses", "StudentDashboard")">كورساتي</a>
+</div>

@@ -13,6 +13,7 @@ namespace StudentManagement.Core.Entities
         public DateTime DateOfBirth { get; set; }
         public string Address { get; set; }
         public bool IsDeleted { get; set; } = false;
+        public ICollection<StudentQuiz> StudentQuizzes { get; set; } = new List<StudentQuiz>();
 
         public virtual ICollection<StudentSubject> StudentSubjects { get; set; }
     }

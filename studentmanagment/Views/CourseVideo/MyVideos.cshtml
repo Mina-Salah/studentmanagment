@@ -1,0 +1,29 @@
+﻿@model IEnumerable<StudentManagement.Core.Entities.Course_file.CourseVideo>
+
+@{
+    ViewData["Title"] = "My Uploaded Videos";
+}
+
+<h2 class="text-primary mb-4">فيديوهاتي</h2>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">لا يوجد فيديوهات مرفوعة حالياً.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var video in Model)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm p-3">
+                    <h5>@video.Title</h5>
+                    <video width="100%" height="300" controls>
+                        <source src="@video.VideoPath" type="video/mp4" />
+                        المتصفح لا يدعم تشغيل الفيديو.
+                    </video>
+                </div>
+            </div>
+        }
+    </div>
+}

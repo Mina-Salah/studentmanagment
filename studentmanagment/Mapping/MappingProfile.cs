@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using StudentManagement.Core.Entities;
+using StudentManagement.Core.Entities.Course_file;
 using StudentManagement.Web.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -13,19 +14,30 @@ namespace StudentManagement.Core.Mapping
     {
         public MappingProfile()
         {
-            // ViewModel to Entity
+            // Student
             CreateMap<StudentFormViewModel, Student>()
                 .ForMember(dest => dest.StudentSubjects, opt => opt.Ignore());
 
-            // Entity to ViewModel
             CreateMap<Student, StudentFormViewModel>()
                 .ForMember(dest => dest.Subjects, opt => opt.Ignore());
 
-            // Subject ↔ ViewModel
+            // Subject
             CreateMap<Subject, SubjectCheckboxItem>()
-    .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
-
+                .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
             CreateMap<SubjectCheckboxItem, Subject>();
+
+            // Teacher
+            CreateMap<Teacher, TeacherViewModel>().ReverseMap();
+
+            // Category
+            CreateMap<Category, CategoryViewModel>().ReverseMap();
+
+            CreateMap<Course, CourseViewModel>()
+      .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.FullName))
+      .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+
+            CreateMap<CourseViewModel, Course>();
         }
     }
+
 }

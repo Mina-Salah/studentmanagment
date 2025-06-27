@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace StudentManagement.Web.Controllers
 {
-    [Authorize] // Restricts access to authenticated users only
+    [Authorize(Roles = "Admin")]
     public class SubjectsController : Controller
     {
         private readonly ISubjectService _subjectService;

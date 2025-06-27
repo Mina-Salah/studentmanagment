@@ -1,6 +1,7 @@
 ﻿
 
 using BCrypt.Net;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using StudentManagement.Core.Entities;
 using StudentManagement.Core.Interfaces;
 using StudentManagement.Services.Interfaces;
@@ -19,7 +20,7 @@ namespace StudentManagement.Services.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> RegisterAsync(string email, string password)
+        public async Task<bool> RegisterAsync(string email, string password, string role,string fullname)
         {
             var hashed = HashPassword(password);
 
@@ -29,11 +30,20 @@ namespace StudentManagement.Services.Implementations
             if (existingUser != null)
                 return false;
 
-            var user = new User { Email = email, PasswordHash = hashed, Role = "User" };
+            var user = new User
+            {
+                Email = email,
+                PasswordHash = hashed,
+                Role = role,
+                IsActive = true,
+                FullName= fullname
+            };
+
             await _unitOfWork.Users.AddAsync(user);
-            await _unitOfWork.CompleteAsync(); // استدعاء SaveChanges عبر الـ UnitOfWork
+            await _unitOfWork.CompleteAsync(); // حفظ التغييرات
             return true;
         }
+
 
         public async Task<User?> LoginAsync(string email, string password)
         {
@@ -51,6 +61,11 @@ namespace StudentManagement.Services.Implementations
             }
 
             return null;
+        }
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            var users = await _unitOfWork.Users.GetAllAsync();
+            return users.FirstOrDefault(u => u.Email == email);
         }
 
         private string HashPassword(string password)

@@ -1,0 +1,73 @@
+﻿@model IEnumerable<StudentManagement.Web.ViewModels.CourseViewModel>
+
+@{
+    ViewBag.Title = "Courses";
+    var categories = ViewBag.Categories as List<StudentManagement.Core.Entities.Category>;
+    int? currentCategory = ViewBag.CurrentCategory as int?;
+    string currentSort = ViewBag.CurrentSort as string ?? "";
+    string currentSearch = ViewBag.CurrentSearch as string ?? "";
+}
+
+<h2 class="mb-4">Courses</h2>
+
+<!-- Filters -->
+<form id="filterForm" class="row g-3 align-items-end mb-4">
+    <div class="col-md-4">
+        <label for="search" class="form-label fw-semibold">
+            <i class="bi bi-search"></i> Search by Title or Teacher
+        </label>
+        <input type="text" name="search" id="search" value="@currentSearch"
+               class="form-control" placeholder="e.g., C# Basics or Mr. John"
+               oninput="submitFilterForm()" />
+    </div>
+
+    <div class="col-md-3">
+        <label for="categoryId" class="form-label fw-semibold">
+            <i class="bi bi-tags"></i> Category
+        </label>
+        <select name="categoryId" id="categoryId" class="form-select" onchange="submitFilterForm()">
+            <option value="">-- All Categories --</option>
+            @foreach (var category in categories!)
+            {
+                <option value="@category.Id" selected="@(category.Id == currentCategory)">
+                    @category.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="sortOrder" class="form-label fw-semibold">
+            <i class="bi bi-sort-down-alt"></i> Sort By
+        </label>
+        <select name="sortOrder" id="sortOrder" class="form-select" onchange="submitFilterForm()">
+            <option value="">Title (A-Z)</option>
+            <option value="start_asc" selected="@(currentSort == "start_asc")">Start Date ↑</option>
+            <option value="start_desc" selected="@(currentSort == "start_desc")">Start Date ↓</option>
+        </select>
+    </div>
+</form>
+
+<!-- Create Button -->
+<div class="mb-3">
+    <a asp-action="Create" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Create New Course
+    </a>
+</div>
+
+<!-- Course Table Container (AJAX will inject content here) -->
+<div id="courseTableContainer">
+    @await Html.PartialAsync("_CourseTablePartial", Model)
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+               function submitFilterForm() {
+            let formData = $("#filterForm").serialize();
+            $.get("/Courses/FilterCourses", formData, function (result) {
+                $("#courseTableContainer").html(result);
+            });
+        }
+    </script>
+}

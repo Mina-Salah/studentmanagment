@@ -1,0 +1,29 @@
+﻿@model StudentManagement.Web.ViewModels.UploadVideoViewModel
+
+@{
+    ViewData["Title"] = "Upload Video";
+}
+
+<h2 class="text-primary mb-4">Upload Course Video</h2>
+
+<form asp-action="Upload" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="VideoFile" class="form-label"></label>
+        <input asp-for="VideoFile" type="file" class="form-control" />
+        <span asp-validation-for="VideoFile" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        <i class="bi bi-upload"></i> Upload
+    </button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

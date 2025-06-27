@@ -1,18 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+
+using System.Collections.Generic;
 
 namespace StudentManagement.Core.Entities
 {
     public class User
     {
         public int Id { get; set; }
-
-        [Required]
-        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-        public string Email { get; set; } // This is Email
-
-        [Required]
+        public string FullName { get; set; }
+        public string Email { get; set; }
         public string PasswordHash { get; set; }
+        public string Role { get; set; }
+        public bool IsActive { get; set; }
 
-        public string Role { get; set; } = "User";
+        public virtual ICollection<Enrollment> Enrollments { get; set; }
     }
 }

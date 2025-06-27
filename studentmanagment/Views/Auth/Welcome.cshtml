@@ -1,27 +1,86 @@
 ﻿@{
     ViewData["Title"] = "Welcome";
+    var role = ViewBag.Role as string ?? "User";
+
+    Func<string, string> TranslateRole = role => role switch
+    {
+        "Admin" => "Administrator",
+        "Teacher" => "Teacher",
+        "Student" => "Student",
+        _ => "User"
+    };
+
+    Func<string, string> GetRoleBadgeClass = role => role switch
+    {
+        "Admin" => "bg-danger text-white",
+        "Teacher" => "bg-success text-white",
+        "Student" => "bg-primary text-white",
+        _ => "bg-secondary text-white"
+    };
+
+    string roleDisplay = TranslateRole(role);
+    string dashboardUrl = role switch
+    {
+        "Admin" => Url.Action("Index", "Dashboard"),
+        "Teacher" => Url.Action("Dashboard", "TeacherDashboard"),
+        "Student" => Url.Action("Dashboard", "StudentDashboard"),
+        _ => Url.Action("Index", "Home")
+    };
 }
 
-<div class="container-fluid d-flex justify-content-center align-items-center" style="min-height: 80vh; background: linear-gradient(45deg, #a8c0d9, #d0e1f9); animation: backgroundMove 5s infinite alternate;">
-    <div class="card p-4 shadow-lg" style="max-width: 500px; width: 100%; opacity: 0;" id="welcomeCard">
+<div class="container-fluid d-flex justify-content-center align-items-center"
+     style="min-height: 80vh; background: linear-gradient(45deg, #f0f4f8, #dbeafe); animation: backgroundMove 5s infinite alternate;">
+    <div class="card p-4 shadow-lg" style="max-width: 500px; width: 100%;" id="welcomeCard">
         <div class="text-center">
             <i class="bi bi-person-circle" style="font-size: 4rem; color: #6c757d;"></i>
-            <h2 class="mt-3 text-primary">Welcome, @ViewBag.Username</h2>
-            <p class="text-muted">You have logged in successfully as <strong>@ViewBag.Role</strong>.</p>
-            <a href="@Url.Action("Index", "Dashboard")" class="btn btn-primary mt-3">
-                <i class="bi bi-house-door-fill"></i> Go to Dashboard
+            <h2 class="mt-3 text-primary">Welcome</h2>
+
+            <p class="text-muted">
+                You are logged in as
+                <span class="badge @GetRoleBadgeClass(role)">
+                    @roleDisplay
+                </span>
+            </p>
+
+            <p class="text-info mt-3">
+                Redirecting to your dashboard in <span id="countdown">5</span> seconds...
+            </p>
+
+            <a href="@dashboardUrl" class="btn btn-primary mt-2">
+                <i class="bi bi-house-door-fill"></i> Go to Dashboard now
             </a>
+
+            <form asp-controller="Auth" asp-action="Logout" method="post" class="mt-3">
+                <button class="btn btn-outline-danger" type="submit">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </button>
+            </form>
         </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-4" role="alert">
+                @TempData["Success"]
+            </div>
+        }
     </div>
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-        $(document).ready(function() {
-            $('#welcomeCard').fadeTo(1500, 1); // Fade in effect
+        $(document).ready(function () {
+            $('#welcomeCard').addClass('fade-in-up');
+
+            let seconds = 5;
+            const countdown = setInterval(function () {
+                seconds--;
+                $('#countdown').text(seconds);
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                    window.location.href = "@dashboardUrl";
+                }
+            }, 1000);
         });
     </script>
 }
@@ -29,13 +88,16 @@
 @section Styles {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
-        }
-
         .card {
             border-radius: 15px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1s ease-in-out;
+        }
+
+        .fade-in-up {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
         }
 
         .btn-primary {
@@ -57,16 +119,13 @@
         }
 
         @@keyframes backgroundMove {
-            0%
+            0% {
+                background: linear-gradient(45deg, #f0f4f8, #dbeafe);
+            }
 
-        {
-            background: linear-gradient(45deg, #a8c0d9, #d0e1f9);
-        }
-
-        100% {
-            background: linear-gradient(45deg, #d0e1f9, #a8c0d9);
-        }
-
+            100% {
+                background: linear-gradient(45deg, #dbeafe, #f0f4f8);
+            }
         }
     </style>
 }
