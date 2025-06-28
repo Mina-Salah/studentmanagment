@@ -14,7 +14,7 @@ namespace StudentManagement.Web.ViewModels
         [Required, DataType(DataType.Password)]
         public string Password { get; set; }
 
-        public string Role { get; set; } = "User";
-    }
+     //   public string Role { get; set; }
+     }
 
 }

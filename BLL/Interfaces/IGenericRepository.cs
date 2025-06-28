@@ -24,5 +24,9 @@ namespace StudentManagement.Core.Interfaces
         void Delete(T entity);
         Task SoftDeleteAsync(int id);
         Task<bool> ExistsAsync(int id);
+
+
+        Task<IEnumerable<T>> GetAllIncludingDeletedAsync();
+
     }
 }

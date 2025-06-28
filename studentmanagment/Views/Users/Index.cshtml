@@ -1,0 +1,82 @@
+﻿@model StudentManagement.Web.ViewModels.UserFilterViewModel
+
+@{
+    ViewData["Title"] = "Users Management";
+}
+
+<h2 class="mb-4">Users Management</h2>
+
+<!-- 🔢 Counters -->
+<div class="mb-3">
+    <span class="badge bg-primary">Total Users: @Model.TotalUsers</span>
+    <span class="badge bg-success">Students: @Model.TotalStudents</span>
+    <span class="badge bg-info">Teachers: @Model.TotalTeachers</span>
+    <span class="badge bg-danger">Deleted: @Model.DeletedCount</span>
+</div>
+
+<!-- 🔍 Filter Form -->
+<form method="get" class="row mb-4">
+    <div class="col-md-4">
+        <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by name or email" />
+    </div>
+    <div class="col-md-3">
+        <select name="roleFilter" class="form-select">
+            @foreach (var role in Model.Roles)
+            {
+                <option value="@role.Value" selected="@(Model.RoleFilter == role.Value ? "selected" : null)">
+                    @role.Text
+                </option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-secondary w-100">Filter</button>
+    </div>
+</form>
+
+<!-- 🔽 Users Table -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th style="width: 150px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr class="@(user.IsDeleted ? "table-danger" : "")">
+                <td>@user.FullName</td>
+                <td>@user.Email</td>
+                <td>@user.Role</td>
+                <td>
+                    @if (user.IsDeleted)
+                    {
+                        <span class="badge bg-danger">Deleted</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                </td>
+                <td>
+                    @if (!user.IsDeleted)
+                    {
+                        <form asp-action="SoftDelete" asp-route-id="@user.Id" method="post" class="d-inline">
+                            <button class="btn btn-sm btn-warning" onclick="return confirm('Confirm delete?')">Delete</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Restore" asp-route-id="@user.Id" method="post" class="d-inline">
+                            <button class="btn btn-sm btn-success">Restore</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

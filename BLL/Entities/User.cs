@@ -11,6 +11,7 @@ namespace StudentManagement.Core.Entities
         public string PasswordHash { get; set; }
         public string Role { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public virtual ICollection<Enrollment> Enrollments { get; set; }
     }

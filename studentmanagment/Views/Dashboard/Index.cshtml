@@ -1,170 +1,179 @@
 ﻿@model StudentManagement.Web.ViewModels.DashboardViewModel
 
 <div class="container-fluid p-0">
-	<h1 class="h3 mb-3"><strong>Admin</strong> Dashboard</h1>
+    <h1 class="h3 mb-3"><strong>Admin</strong> Dashboard</h1>
 
-	<div class="row">
-		<!-- Students -->
-		<div class="col-sm-6 col-lg-3">
-			<div class="card">
-				<div class="card-body">
-					<div class="row">
-						<div class="col mt-0">
-							<h5 class="card-title">Students</h5>
-						</div>
-						<div class="col-auto">
-							<div class="stat text-primary">
-								<i data-feather="user"></i>
-							</div>
-						</div>
-					</div>
-					<h1 class="mt-1 mb-3">@Model.TotalStudents</h1>
-					<div class="mb-0 text-muted">Registered students</div>
-				</div>
-			</div>
-		</div>
+    <div class="row">
+        <!-- Total Users -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Total Users</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-primary">
+                                <i data-feather="users"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">@Model.TotalUsers</h1>
+                    <div class="mb-0 text-muted">All registered users</div>
+                </div>
+            </div>
+        </div>
 
-		<!-- Teachers -->
-		<div class="col-sm-6 col-lg-3">
-			<div class="card">
-				<div class="card-body">
-					<div class="row">
-						<div class="col mt-0">
-							<h5 class="card-title">Teachers</h5>
-						</div>
-						<div class="col-auto">
-							<div class="stat text-primary">
-								<i data-feather="users"></i>
-							</div>
-						</div>
-					</div>
-					<h1 class="mt-1 mb-3">@Model.TotalTeachers</h1>
-					<div class="mb-0 text-muted">Active teaching staff</div>
-				</div>
-			</div>
-		</div>
+        <!-- Students -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Students</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-success">
+                                <i data-feather="user"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-1">@Model.ActiveStudents</h1>
+                    <small class="text-muted">Active: @Model.ActiveStudents / Deleted: @Model.DeletedStudents</small>
+                </div>
+            </div>
+        </div>
 
-		<!-- Courses -->
-		<div class="col-sm-6 col-lg-3">
-			<div class="card">
-				<div class="card-body">
-					<div class="row">
-						<div class="col mt-0">
-							<h5 class="card-title">Courses</h5>
-						</div>
-						<div class="col-auto">
-							<div class="stat text-primary">
-								<i data-feather="book-open"></i>
-							</div>
-						</div>
-					</div>
-					<h1 class="mt-1 mb-3">@Model.TotalCourses</h1>
-					<div class="mb-0 text-muted">Running & completed</div>
-				</div>
-			</div>
-		</div>
+        <!-- Teachers -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Teachers</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-info">
+                                <i data-feather="user-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-1">@Model.ActiveTeachers</h1>
+                    <small class="text-muted">Active: @Model.ActiveTeachers / Deleted: @Model.DeletedTeachers</small>
+                </div>
+            </div>
+        </div>
 
-		<!-- Subjects -->
-		<div class="col-sm-6 col-lg-3">
-			<div class="card">
-				<div class="card-body">
-					<div class="row">
-						<div class="col mt-0">
-							<h5 class="card-title">Subjects</h5>
-						</div>
-						<div class="col-auto">
-							<div class="stat text-primary">
-								<i data-feather="layers"></i>
-							</div>
-						</div>
-					</div>
-					<h1 class="mt-1 mb-3">@Model.TotalSubjects</h1>
-					<div class="mb-0 text-muted">Available subjects</div>
-				</div>
-			</div>
-		</div>
-	</div>
+        <!-- Deleted Users -->
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Deleted Users</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-danger">
+                                <i data-feather="trash-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">@Model.DeletedUsers</h1>
+                    <div class="mb-0 text-muted">Soft-deleted accounts</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<div class="row">
-		<!-- Chart Area -->
-		<div class="col-xl-8">
-			<div class="card">
-				<div class="card-header">
-					<h5 class="card-title mb-0">Student Enrollment Trends</h5>
-				</div>
-				<div class="card-body">
-					<canvas id="enrollmentTrendChart"></canvas>
-				</div>
-			</div>
-		</div>
+    <div class="row">
+        <!-- Courses -->
+        <div class="col-sm-6 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Courses</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-warning">
+                                <i data-feather="book-open"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">@Model.TotalCourses</h1>
+                    <div class="mb-0 text-muted">Total available courses</div>
+                </div>
+            </div>
+        </div>
 
-		<!-- Calendar -->
-		<div class="col-xl-4">
-			<div class="card">
-				<div class="card-header">
-					<h5 class="card-title mb-0">Calendar</h5>
-				</div>
-				<div class="card-body">
-					<div id="dashboardCalendar"></div>
-				</div>
-			</div>
-		</div>
-	</div>
+        <!-- Subjects -->
+        <div class="col-sm-6 col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title">Subjects</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-secondary">
+                                <i data-feather="layers"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">@Model.TotalSubjects</h1>
+                    <div class="mb-0 text-muted">Available subjects</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!-- Project List (for admins managing curriculum updates or exams) -->
-	<div class="row">
-		<div class="col-12">
-			<div class="card">
-				<div class="card-header">
-					<h5 class="card-title mb-0">Recent Activities</h5>
-				</div>
-				<table class="table table-hover">
-					<thead>
-						<tr>
-							<th>Activity</th>
-							<th>Date</th>
-							<th>Performed By</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td>Added new course: Biology</td>
-							<td>2025-06-24</td>
-							<td>Admin</td>
-						</tr>
-						<tr>
-							<td>Registered new student: John Doe</td>
-							<td>2025-06-23</td>
-							<td>Registrar</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
+    <!-- Chart & Calendar Row -->
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Student Enrollment Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="enrollmentTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Calendar</h5>
+                </div>
+                <div class="card-body">
+                    <div id="dashboardCalendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script>
-		const ctx = document.getElementById('enrollmentTrendChart');
-		new Chart(ctx, {
-			type: 'line',
-			data: {
-				labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-				datasets: [{
-					label: 'Enrolled Students',
-					data: [120, 150, 180, 200, 220, 250],
-					borderColor: 'rgb(75, 192, 192)',
-					tension: 0.1
-				}]
-			},
-			options: {
-				responsive: true
-			}
-		});
-	</script>
-	<script>
-		feather.replace();
-	</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('enrollmentTrendChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Enrolled Students',
+                    data: [120, 150, 180, 200, 220, 250],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+    <script>
+        feather.replace();
+    </script>
 }

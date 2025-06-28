@@ -106,5 +106,13 @@ namespace StudentManagement.Data.Repositories
             var entity = await _dbSet.FindAsync(id);
             return entity != null;
         }
+      
+
+          public async Task<IEnumerable<T>> GetAllIncludingDeletedAsync()
+            {
+                return await _dbSet.IgnoreQueryFilters().ToListAsync();
+            }
+        }
+
     }
-}
+

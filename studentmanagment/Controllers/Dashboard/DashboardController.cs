@@ -1,35 +1,42 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StudentManagement.Core.Entities;
 using StudentManagement.Core.Interfaces;
 using StudentManagement.Web.ViewModels;
 
-
-namespace StudentManagement.Web.Controllers.Dashboard
+[Authorize(Roles = "Admin")]
+public class DashboardController : Controller
 {
-    [Authorize(Roles = "Admin")]
+    private readonly IUnitOfWork _unitOfWork;
 
-    public class DashboardController : Controller
+    public DashboardController(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public DashboardController(IUnitOfWork unitOfWork)
+    public async Task<IActionResult> Index()
+    {
+        var allUsers = await _unitOfWork.Users.GetAllIncludingDeletedAsync();
+        var activeUsers = allUsers.Where(u => !u.IsDeleted).ToList();
+        var deletedUsers = allUsers.Where(u => u.IsDeleted).ToList();
+
+        var model = new DashboardViewModel
         {
-            _unitOfWork = unitOfWork;
-        }
+            TotalUsers = allUsers.Count(),
+            ActiveUsers = activeUsers.Count(),
+            DeletedUsers = deletedUsers.Count(),
 
-        public async Task<IActionResult> Index()
-        {
-            var model = new DashboardViewModel
-            {
-                TotalStudents = (await _unitOfWork.Users.GetAllAsync(u => u.Role == "User")).Count(),
-                TotalTeachers = (await _unitOfWork.Users.GetAllAsync(u => u.Role == "Teacher")).Count(),
-                TotalCourses = (await _unitOfWork.Courses.GetAllAsync()).Count(),
-                TotalSubjects = (await _unitOfWork.Subjects.GetAllAsync()).Count()
-            };
+            TotalStudents = allUsers.Count(u => u.Role == "User"),
+            ActiveStudents = activeUsers.Count(u => u.Role == "User"),
+            DeletedStudents = deletedUsers.Count(u => u.Role == "User"),
 
-            return View(model);
-        }
+            TotalTeachers = allUsers.Count(u => u.Role == "Teacher"),
+            ActiveTeachers = activeUsers.Count(u => u.Role == "Teacher"),
+            DeletedTeachers = deletedUsers.Count(u => u.Role == "Teacher"),
+
+            TotalCourses = (await _unitOfWork.Courses.GetAllAsync()).Count(),
+            TotalSubjects = (await _unitOfWork.Subjects.GetAllAsync()).Count()
+        };
+
+        return View(model);
     }
 }

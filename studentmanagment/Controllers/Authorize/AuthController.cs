@@ -26,30 +26,36 @@ namespace StudentManagement.Web.Controllers.Authorize
             if (!ModelState.IsValid)
                 return View(model);
 
-            var success = await _authService.RegisterAsync(model.Email, model.Password, model.Role, model.FullName);
-
-            if (!success)
+            var existingUser = await _authService.GetUserByEmailAsync(model.Email);
+            if (existingUser != null)
             {
-                ViewBag.Message = "Email is already registered.";
+                ViewBag.Message = $"هذا الإيميل مسجل بالفعل كـ {existingUser.Role}.";
                 return View(model);
             }
 
-            // ✅ تسجيل الدخول تلقائيًا بعد التسجيل
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, model.Email),
-                new Claim(ClaimTypes.Role, model.Role),
-                    new Claim(ClaimTypes.Email, model.Email) 
+            // ✅ قم بتسجيل الطالب فقط (الرول ثابت)
+            var success = await _authService.RegisterAsync(model.Email, model.Password, "Student", model.FullName);
 
-            };
+            if (!success)
+            {
+                ViewBag.Message = "حدث خطأ أثناء التسجيل.";
+                return View(model);
+            }
+
+            // تسجيل الدخول التلقائي
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, model.Email),
+        new Claim(ClaimTypes.Role, "Student"),
+        new Claim(ClaimTypes.Email, model.Email)
+    };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            // ✅ التوجيه إلى صفحة Welcome بعد التسجيل
-            return RedirectToAction("Welcome", "Auth");
+            return RedirectToAction("Dashboard", "StudentDashboard");
         }
 
         public IActionResult Login() => View();
@@ -65,22 +71,28 @@ namespace StudentManagement.Web.Controllers.Authorize
                 return View();
             }
 
+            // ⬅️ ناخد الدور الحقيقي من قاعدة البيانات
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, user.Role),
-               new Claim(ClaimTypes.Email, user.Email) 
-
-            };
+    {
+        new Claim(ClaimTypes.Name, user.Email),
+        new Claim(ClaimTypes.Role, user.Role),
+        new Claim(ClaimTypes.Email, user.Email)
+    };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            // ✅ التوجيه إلى صفحة Welcome بعد تسجيل الدخول
-            return RedirectToAction("Welcome", "Auth");
+            return user.Role switch
+            {
+                "Student" => RedirectToAction("Dashboard", "StudentDashboard"),
+                "Teacher" => RedirectToAction("Dashboard", "TeacherDashboard"),
+                "Admin" => RedirectToAction("Index", "Dashboard"),
+                _ => RedirectToAction("Welcome", "Auth")
+            };
         }
+
 
         [Authorize]
         public IActionResult Welcome()
