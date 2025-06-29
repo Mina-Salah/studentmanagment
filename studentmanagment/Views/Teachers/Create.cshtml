@@ -1,35 +1,159 @@
 @model StudentManagement.Web.ViewModels.TeacherViewModel
-
 @{
-    ViewData["Title"] = "Create Teacher";
+    ViewData["Title"] = "Add New Teacher";
 }
 
-<h2>Create Teacher</h2>
+<div class="container mt-4">
+    <div class="card border-0 shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>@ViewData["Title"]</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-4">
+                            <label asp-for="Name" class="form-label fw-bold">Teacher Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input asp-for="Name" class="form-control" placeholder="Enter teacher name" />
+                            </div>
+                            <span asp-validation-for="Name" class="text-danger mt-1 d-block"></span>
+                        </div>
 
-<form asp-action="Create" method="post">
-    <div class="form-group">
-        <label asp-for="FullName"></label>
-        <input asp-for="FullName" class="form-control" />
-        <span asp-validation-for="FullName" class="text-danger"></span>
+                        <div class="form-group mb-4">
+                            <label asp-for="DateOfBirth" class="form-label fw-bold">Date of Birth</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                <input asp-for="DateOfBirth" class="form-control" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            </div>
+                            <span asp-validation-for="DateOfBirth" class="text-danger mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Address" class="form-label fw-bold">Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input asp-for="Address" class="form-control" placeholder="Enter teacher's address" />
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Email" class="form-label fw-bold">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="Enter teacher email" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="PhoneNumber" class="form-label fw-bold">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger mt-1 d-block"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Password" class="form-label fw-bold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input asp-for="Password" class="form-control" type="password" placeholder="Enter initial password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger mt-1 d-block"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Save
+                    </button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-arrow-left me-1"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
+</div>
 
-    <div class="form-group">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        $(document).ready(function () {
+            $('input').focus(function () {
+                $(this).parent().addClass('border-primary');
+            }).blur(function () {
+                $(this).parent().removeClass('border-primary');
+            });
 
-    <div class="form-group">
-        <label asp-for="PhoneNumber"></label>
-        <input asp-for="PhoneNumber" class="form-control" />
-        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-    </div>
+            $('form').submit(function () {
+                if ($(this).valid()) {
+                    $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2"></span> Saving...');
+                    $('button[type="submit"]').attr('disabled', true);
+                }
+            });
+        });
+    </script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Tajawal', sans-serif;
+        }
 
-    <div class="form-group">
-        <label for="Password">Password</label>
-        <input type="password" class="form-control" name="Password" required />
-    </div>
+        .card {
+            border-radius: 10px;
+            overflow: hidden;
+        }
 
-    <br />
-    <button type="submit" class="btn btn-primary">Create</button>
-</form>
+        .card-header {
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+
+        .btn {
+            border-radius: 5px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3f6ad8;
+            border-color: #3f6ad8;
+        }
+
+            .btn-primary:hover {
+                background-color: #2d4eb1;
+                border-color: #2d4eb1;
+            }
+
+        .input-group {
+            border-radius: 5px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+            .input-group:focus-within {
+                box-shadow: 0 0 0 0.2rem rgba(63, 106, 216, 0.25);
+            }
+
+        .input-group-text {
+            background-color: #f1f4f9;
+            border-right: none;
+        }
+
+        .form-control {
+            border-left: none;
+        }
+
+            .form-control:focus {
+                border-color: #ced4da;
+                box-shadow: none;
+            }
+    </style>
+}

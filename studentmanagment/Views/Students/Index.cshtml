@@ -1,7 +1,8 @@
+
 @model List<StudentManagement.Web.ViewModels.StudentFormViewModel>
 @{
     ViewData["Title"] = "Student List";
-}
+   }
 
 @if (TempData["SuccessMessage"] != null)
 {
@@ -25,84 +26,69 @@
                     <i class="fas fa-trash me-1"></i> View Deleted
                 </a>
             </div>
-        </div>
 
-    </div>
-
-
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center p-4">
-            <i class="fas fa-info-circle fa-2x mb-3"></i>
-            <h5>No students are currently registered</h5>
-            <p class="mb-0">Please add new students using the "Add New Student" button</p>
-        </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th scope="col">
-                            <i class="fas fa-user me-1 text-primary"></i>
-                            Name
-                        </th>
-                        <th scope="col">
-                            <i class="fas fa-calendar-alt me-1 text-primary"></i>
-                            Date of Birth
-                        </th>
-                        <th scope="col">
-                            <i class="fas fa-map-marker-alt me-1 text-primary"></i>
-                            Address
-                        </th>
-                        <th scope="col">
-                            <i class="fas fa-book me-1 text-primary"></i>
-                            Subjects
-                        </th>
-                        <th scope="col" class="text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var student in Model)
-                    {
-                        <tr class="student-row">
-                            <td class="fw-bold">@student.Name</td>
-                            <td>@student.DateOfBirth.ToShortDateString()</td>
-                            <td>@student.Address</td>
-                            <td>
-                                @if (student.Subjects.Any(s => s.IsSelected))
-                                {
-                                    <div class="mt-1">
-                                        @foreach (var subject in student.Subjects)
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info text-center p-4">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h5>No students are currently registered</h5>
+                    <p class="mb-0">Please add new students using the "Add New Student" button</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="fas fa-user me-1 text-primary"></i>Name</th>
+                                <th><i class="fas fa-envelope me-1 text-primary"></i>Email</th>
+                                <th><i class="fas fa-calendar-alt me-1 text-primary"></i>Date of Birth</th>
+                                <th><i class="fas fa-map-marker-alt me-1 text-primary"></i>Address</th>
+                                <th><i class="fas fa-book me-1 text-primary"></i>Subjects</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var student in Model)
+                            {
+                                <tr class="student-row">
+                                    <td class="fw-bold">@student.Name</td>
+                                    <td>@student.Email</td>
+                                    <td>@student.DateOfBirth.ToShortDateString()</td>
+                                    <td>@student.Address</td>
+                                    <td>
+                                        @if (student.Subjects.Any(s => s.IsSelected))
                                         {
-                                            <span class="badge bg-light text-dark me-1">@subject.Name</span>
+                                            <div class="mt-1">
+                                                @foreach (var subject in student.Subjects)
+                                                {
+                                                    <span class="badge bg-light text-dark me-1">@subject.Name</span>
+                                                }
+                                            </div>
                                         }
-                                    </div>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-light text-muted">No Subjects</span>
-                                }
-                            </td>
-                            <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger"
-                                       onclick="showDeleteModal(@student.Id, '@student.Name')" data-bs-toggle="tooltip" title="Delete">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                                        else
+                                        {
+                                            <span class="badge bg-light text-muted">No Subjects</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@student.Id" class="btn btn-sm btn-outline-info me-1" data-bs-toggle="tooltip" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger" onclick="showDeleteModal(@student.Id, '@student.Name')" data-bs-toggle="tooltip" title="Delete">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
-    }
-</div>
     </div>
 </div>
 
@@ -139,161 +125,29 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
-        // Function to show the delete modal
         function showDeleteModal(id, name) {
-            // Set values in the modal
             document.getElementById('studentIdToDelete').value = id;
             document.getElementById('studentNameToDelete').innerText = name;
-
-            // Get reference to the modal
             var myModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-
-            // Show the modal
             myModal.show();
         }
 
-        // Ensure Bootstrap is loaded correctly
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if Bootstrap is defined
-            if (typeof bootstrap === 'undefined') {
-                console.error('Bootstrap is not defined. Please ensure Bootstrap library is correctly included.');
-            }
-
-            // Enable tooltips
+        document.addEventListener('DOMContentLoaded', function () {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Hover effect
             var studentRows = document.querySelectorAll('.student-row');
-            studentRows.forEach(function(row) {
-                row.addEventListener('mouseenter', function() {
+            studentRows.forEach(function (row) {
+                row.addEventListener('mouseenter', function () {
                     this.classList.add('bg-light');
                 });
-                row.addEventListener('mouseleave', function() {
+                row.addEventListener('mouseleave', function () {
                     this.classList.remove('bg-light');
                 });
             });
         });
     </script>
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Tajawal', sans-serif;
-        }
-
-        .card {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .card-header {
-            border-bottom: none;
-            padding: 15px 20px;
-        }
-
-        .btn {
-            border-radius: 5px;
-            padding: 8px 20px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background-color: #3f6ad8;
-            border-color: #3f6ad8;
-        }
-
-            .btn-primary:hover {
-                background-color: #2d4eb1;
-                border-color: #2d4eb1;
-            }
-
-        .btn-success {
-            background-color: #3ac47d;
-            border-color: #3ac47d;
-        }
-
-            .btn-success:hover {
-                background-color: #2e9d64;
-                border-color: #2e9d64;
-            }
-
-        .btn-sm {
-            padding: 0.4rem 0.8rem;
-        }
-
-        .table {
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-            .table th {
-                font-weight: 600;
-                background-color: #f1f4f9;
-                border-top: none;
-                padding: 15px;
-            }
-
-            .table td {
-                padding: 15px;
-                vertical-align: middle;
-            }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(63, 106, 216, 0.05);
-        }
-
-        .modal-content {
-            border-radius: 10px;
-            overflow: hidden;
-            border: none;
-        }
-
-        .modal-header {
-            border-bottom: none;
-            padding: 15px 20px;
-        }
-
-        .modal-footer {
-            border-top: none;
-            padding: 15px 20px;
-        }
-
-        .alert {
-            border-radius: 5px;
-        }
-
-        .btn-outline-info {
-            color: #3f6ad8;
-            border-color: #3f6ad8;
-        }
-
-            .btn-outline-info:hover {
-                background-color: #3f6ad8;
-                border-color: #3f6ad8;
-                color: white;
-            }
-
-        .btn-outline-danger {
-            color: #d92550;
-            border-color: #d92550;
-        }
-
-            .btn-outline-danger:hover {
-                background-color: #d92550;
-                border-color: #d92550;
-                color: white;
-            }
-
-        .badge {
-            padding: 0.5em 0.8em;
-            font-weight: 500;
-            border-radius: 5px;
-        }
-    </style>
 }

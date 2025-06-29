@@ -25,9 +25,9 @@ public class DashboardController : Controller
             ActiveUsers = activeUsers.Count(),
             DeletedUsers = deletedUsers.Count(),
 
-            TotalStudents = allUsers.Count(u => u.Role == "User"),
-            ActiveStudents = activeUsers.Count(u => u.Role == "User"),
-            DeletedStudents = deletedUsers.Count(u => u.Role == "User"),
+            TotalStudents = allUsers.Count(u => u.Role == "Student"),
+            ActiveStudents = activeUsers.Count(u => u.Role == "Student"),
+            DeletedStudents = deletedUsers.Count(u => u.Role == "Student"),
 
             TotalTeachers = allUsers.Count(u => u.Role == "Teacher"),
             ActiveTeachers = activeUsers.Count(u => u.Role == "Teacher"),

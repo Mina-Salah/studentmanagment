@@ -136,7 +136,7 @@ namespace StudentManagement.Web.Controllers
                 search = search.Trim().ToLower();
                 list = list.Where(c =>
                     (!string.IsNullOrEmpty(c.Title) && c.Title.ToLower().Contains(search)) ||
-                    (!string.IsNullOrEmpty(c.Teacher?.FullName) && c.Teacher.FullName.ToLower().Contains(search))
+                    (!string.IsNullOrEmpty(c.Teacher?.Name) && c.Teacher.Name.ToLower().Contains(search))
                 ).ToList();
             }
 
@@ -152,5 +152,6 @@ namespace StudentManagement.Web.Controllers
 
             return list;
         }
+
     }
 }

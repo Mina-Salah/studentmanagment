@@ -1,53 +1,133 @@
-﻿using StudentManagement.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using StudentManagement.Core.Entities;
 using StudentManagement.Core.Interfaces;
 using StudentManagement.Services.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace StudentManagement.Services.Implementations
+public class TeacherService : ITeacherService
 {
-    public class TeacherService : ITeacherService
+    private readonly IUnitOfWork _unitOfWork;
+
+    public TeacherService(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public TeacherService(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
+    public async Task CreateTeacherAsync(Teacher teacher, string email, string password)
+    {
+        // المستخدم تم إنشاؤه بالفعل في AuthService.RegisterAsync
+        var user = (await _unitOfWork.Users.GetAllAsync())
+            .FirstOrDefault(u => u.Email == email);
 
-        public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
-        {
-            return await _unitOfWork.Teachers.GetAllAsync();
-        }
+        if (user == null)
+            throw new Exception("لم يتم العثور على المستخدم.");
 
-        public async Task<Teacher?> GetTeacherByIdAsync(int id)
-        {
-            return await _unitOfWork.Teachers.GetByIdAsync(id);
-        }
+        teacher.UserId = user.Id;
+        await _unitOfWork.Teachers.AddAsync(teacher);
+        await _unitOfWork.CompleteAsync();
+    }
 
-        public async Task AddTeacherAsync(Teacher teacher)
-        {
-            await _unitOfWork.Teachers.AddAsync(teacher);
-            await _unitOfWork.CompleteAsync();
-        }
 
-        public async Task UpdateTeacherAsync(Teacher teacher)
-        {
-            _unitOfWork.Teachers.Update(teacher);
-            await _unitOfWork.CompleteAsync();
-        }
+    public async Task<IEnumerable<Teacher>> GetAllTeachersAsync()
+    {
+        return await _unitOfWork.Teachers.GetAllAsync(
+            filter: t => !t.IsDeleted,
+            include: q => q.Include(t => t.User)
+        );
+    }
 
-        public async Task DeleteTeacherAsync(int id)
+    public async Task<Teacher?> GetTeacherByIdAsync(int id)
+    {
+        return await _unitOfWork.Teachers.GetByIdAsync(id,
+            include: q => q.Include(t => t.User));
+    }
+
+    public async Task UpdateTeacherAsync(int id, Teacher updatedTeacher)
+    {
+        var existingTeacher = await _unitOfWork.Teachers.GetByIdAsync(id);
+        if (existingTeacher == null)
+            throw new Exception("Teacher not found");
+
+        existingTeacher.Name = updatedTeacher.Name;
+        existingTeacher.Address = updatedTeacher.Address;
+        existingTeacher.DateOfBirth = updatedTeacher.DateOfBirth;
+
+        _unitOfWork.Teachers.Update(existingTeacher);
+        await _unitOfWork.CompleteAsync();
+    }
+
+    // ✅ حذف ناعم (مع المستخدم)
+    public async Task DeleteTeacherAsync(int id)
+    {
+        var teacher = await _unitOfWork.Teachers.GetByIdAsync(id);
+        if (teacher == null)
+            throw new Exception("Teacher not found");
+
+        teacher.IsDeleted = true;
+        _unitOfWork.Teachers.Update(teacher);
+
+        if (teacher.UserId.HasValue)
         {
-            var teacher = await _unitOfWork.Teachers.GetByIdAsync(id);
-            if (teacher != null)
+            var user = await _unitOfWork.Users.GetByIdAsync(teacher.UserId.Value);
+            if (user != null)
             {
-                _unitOfWork.Teachers.Delete(teacher);
-                await _unitOfWork.CompleteAsync();
+                user.IsDeleted = true;
+                _unitOfWork.Users.Update(user);
             }
         }
+
+        await _unitOfWork.CompleteAsync();
+    }
+
+    public async Task<IEnumerable<Teacher>> GetDeletedTeachersAsync()
+    {
+        return await _unitOfWork.Teachers.GetAllAsync(
+            filter: t => t.IsDeleted,
+            include: q => q.Include(t => t.User),
+            includeSoftDeleted: true
+        );
+    }
+
+    // ✅ استرجاع المدرس والمستخدم
+    public async Task RestoreTeacherAsync(int id)
+    {
+        var teacher = await _unitOfWork.Teachers.GetByIdIncludingDeletedAsync(id);
+        if (teacher == null)
+            throw new Exception("Teacher not found");
+
+        teacher.IsDeleted = false;
+        _unitOfWork.Teachers.Update(teacher);
+
+        if (teacher.UserId.HasValue)
+        {
+            var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(teacher.UserId.Value);
+            if (user != null)
+            {
+                user.IsDeleted = false;
+                _unitOfWork.Users.Update(user);
+            }
+        }
+
+        await _unitOfWork.CompleteAsync();
+    }
+
+    // ✅ حذف نهائي من المدرسين والمستخدمين
+    public async Task DeleteTeacherPermanentlyAsync(int id)
+    {
+        var teacher = await _unitOfWork.Teachers.GetByIdIncludingDeletedAsync(id);
+        if (teacher == null)
+            throw new Exception("Teacher not found");
+
+        _unitOfWork.Teachers.Delete(teacher);
+
+        if (teacher.UserId.HasValue)
+        {
+            var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(teacher.UserId.Value);
+            if (user != null)
+            {
+                _unitOfWork.Users.Delete(user);
+            }
+        }
+
+        await _unitOfWork.CompleteAsync();
     }
 }

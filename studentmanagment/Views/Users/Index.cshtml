@@ -1,23 +1,32 @@
 ﻿@model StudentManagement.Web.ViewModels.UserFilterViewModel
 
 @{
-    ViewData["Title"] = "Users Management";
+    ViewData["Title"] = "إدارة المستخدمين";
 }
 
-<h2 class="mb-4">Users Management</h2>
+<h2 class="mb-4">إدارة المستخدمين</h2>
 
-<!-- 🔢 Counters -->
+<!-- رسالة نجاح -->
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Message"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- إحصائيات -->
 <div class="mb-3">
-    <span class="badge bg-primary">Total Users: @Model.TotalUsers</span>
-    <span class="badge bg-success">Students: @Model.TotalStudents</span>
-    <span class="badge bg-info">Teachers: @Model.TotalTeachers</span>
-    <span class="badge bg-danger">Deleted: @Model.DeletedCount</span>
+    <span class="badge bg-primary">إجمالي المستخدمين: @Model.TotalUsers</span>
+    <span class="badge bg-success">طلاب: @Model.TotalStudents</span>
+    <span class="badge bg-info">مدرسون: @Model.TotalTeachers</span>
+    <span class="badge bg-danger">محذوفون: @Model.DeletedCount</span>
 </div>
 
-<!-- 🔍 Filter Form -->
+<!-- نموذج البحث والتصفية -->
 <form method="get" class="row mb-4">
     <div class="col-md-4">
-        <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="Search by name or email" />
+        <input type="text" name="search" value="@Model.Search" class="form-control" placeholder="بحث بالاسم أو البريد الإلكتروني" />
     </div>
     <div class="col-md-3">
         <select name="roleFilter" class="form-select">
@@ -30,19 +39,19 @@
         </select>
     </div>
     <div class="col-md-2">
-        <button type="submit" class="btn btn-secondary w-100">Filter</button>
+        <button type="submit" class="btn btn-secondary w-100">تصفية</button>
     </div>
 </form>
 
-<!-- 🔽 Users Table -->
+<!-- جدول المستخدمين -->
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th style="width: 150px;">Actions</th>
+            <th>الاسم الكامل</th>
+            <th>البريد الإلكتروني</th>
+            <th>الصلاحية</th>
+            <th>الحالة</th>
+            <th style="width: 220px;">الإجراءات</th>
         </tr>
     </thead>
     <tbody>
@@ -55,24 +64,34 @@
                 <td>
                     @if (user.IsDeleted)
                     {
-                        <span class="badge bg-danger">Deleted</span>
+                        <span class="badge bg-danger">محذوف</span>
                     }
                     else
                     {
-                        <span class="badge bg-success">Active</span>
+                        <span class="badge bg-success">نشط</span>
                     }
                 </td>
                 <td>
                     @if (!user.IsDeleted)
                     {
+                        <!-- حذف مؤقت -->
                         <form asp-action="SoftDelete" asp-route-id="@user.Id" method="post" class="d-inline">
-                            <button class="btn btn-sm btn-warning" onclick="return confirm('Confirm delete?')">Delete</button>
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-warning" onclick="return confirm('هل تريد حذف هذا المستخدم؟')">حذف</button>
                         </form>
                     }
                     else
                     {
+                        <!-- استرجاع -->
                         <form asp-action="Restore" asp-route-id="@user.Id" method="post" class="d-inline">
-                            <button class="btn btn-sm btn-success">Restore</button>
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-success" onclick="return confirm('استرجاع هذا المستخدم؟')">استرجاع</button>
+                        </form>
+
+                        <!-- حذف نهائي -->
+                        <form asp-action="HardDelete" asp-route-id="@user.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('تحذير: هذا الحذف نهائي. هل أنت متأكد؟')">حذف نهائي</button>
                         </form>
                     }
                 </td>

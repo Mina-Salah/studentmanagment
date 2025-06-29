@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace StudentManagement.Data.Migrations
 {
     [DbContext(typeof(ManagDbContext))]
-    partial class ManagDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250629140902_de")]
+    partial class de
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -597,14 +600,7 @@ namespace StudentManagement.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Students");
                 });
@@ -731,6 +727,35 @@ namespace StudentManagement.Data.Migrations
                     b.ToTable("Submissions");
                 });
 
+            modelBuilder.Entity("StudentManagement.Core.Entities.Teacher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Teachers");
+                });
+
             modelBuilder.Entity("StudentManagement.Core.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -761,49 +786,16 @@ namespace StudentManagement.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[StudentId] IS NOT NULL");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Teacher", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
-
-                    b.ToTable("Teachers");
                 });
 
             modelBuilder.Entity("StudentManagement.Core.Entities.ActivityLog", b =>
@@ -873,7 +865,7 @@ namespace StudentManagement.Data.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Teacher", "Teacher")
+                    b.HasOne("StudentManagement.Core.Entities.Teacher", "Teacher")
                         .WithMany("Courses")
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.SetNull);
@@ -1048,16 +1040,6 @@ namespace StudentManagement.Data.Migrations
                     b.Navigation("Lesson");
                 });
 
-            modelBuilder.Entity("StudentManagement.Core.Entities.Student", b =>
-                {
-                    b.HasOne("StudentManagement.Core.Entities.User", "User")
-                        .WithOne("Student")
-                        .HasForeignKey("StudentManagement.Core.Entities.Student", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("StudentManagement.Core.Entities.StudentQuiz", b =>
                 {
                     b.HasOne("StudentManagement.Core.Entities.Quiz", "Quiz")
@@ -1126,14 +1108,23 @@ namespace StudentManagement.Data.Migrations
                     b.Navigation("Student");
                 });
 
-            modelBuilder.Entity("Teacher", b =>
+            modelBuilder.Entity("StudentManagement.Core.Entities.Teacher", b =>
                 {
                     b.HasOne("StudentManagement.Core.Entities.User", "User")
-                        .WithOne("Teacher")
-                        .HasForeignKey("Teacher", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StudentManagement.Core.Entities.User", b =>
+                {
+                    b.HasOne("StudentManagement.Core.Entities.Student", "Student")
+                        .WithOne("User")
+                        .HasForeignKey("StudentManagement.Core.Entities.User", "StudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("StudentManagement.Core.Entities.Assignment", b =>
@@ -1182,6 +1173,9 @@ namespace StudentManagement.Data.Migrations
             modelBuilder.Entity("StudentManagement.Core.Entities.Student", b =>
                 {
                     b.Navigation("StudentSubjects");
+
+                    b.Navigation("User")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("StudentManagement.Core.Entities.Subject", b =>
@@ -1189,20 +1183,14 @@ namespace StudentManagement.Data.Migrations
                     b.Navigation("StudentSubjects");
                 });
 
+            modelBuilder.Entity("StudentManagement.Core.Entities.Teacher", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
             modelBuilder.Entity("StudentManagement.Core.Entities.User", b =>
                 {
                     b.Navigation("Enrollments");
-
-                    b.Navigation("Student")
-                        .IsRequired();
-
-                    b.Navigation("Teacher")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Teacher", b =>
-                {
-                    b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618
         }

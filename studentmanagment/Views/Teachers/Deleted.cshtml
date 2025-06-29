@@ -1,0 +1,56 @@
+﻿@model List<StudentManagement.Web.ViewModels.TeacherViewModel>
+
+@{
+    ViewData["Title"] = "المدرسين المحذوفين";
+}
+
+<h2>المدرسين المحذوفين</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>الاسم</th>
+            <th>العنوان</th>
+            <th>تاريخ الميلاد</th>
+            <th>الإيميل</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var teacher in Model)
+        {
+            <tr>
+                <td>@teacher.Name</td>
+                <td>@teacher.Address</td>
+                <td>@(teacher.DateOfBirth?.ToString("yyyy-MM-dd"))</td>
+                <td>@teacher.Email</td>
+                <td>
+                    <form asp-action="Restore" asp-controller="Teachers" method="post" style="display:inline">
+                        <input type="hidden" name="id" value="@teacher.Id" />
+                        <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('هل تريد استرجاع هذا المدرس؟')">
+                            استرجاع
+                        </button>
+                    </form>
+
+                    <form asp-action="DeletePermanent" asp-controller="Teachers" method="post" style="display:inline; margin-right: 5px;">
+                        <input type="hidden" name="id" value="@teacher.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع!')">
+                            حذف نهائي
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">رجوع إلى القائمة</a>

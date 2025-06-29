@@ -1,11 +1,11 @@
-﻿using StudentManagement.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using StudentManagement.Core.Entities;
 using StudentManagement.Core.Interfaces;
+using StudentManagement.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using StudentManagement.Services.Interfaces;
 
 namespace StudentManagement.Services.Implementations
 {
@@ -18,15 +18,27 @@ namespace StudentManagement.Services.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task CreateStudentAsync(Student student, List<int> subjectIds)
+        public async Task CreateStudentAsync(Student student, List<int> subjectIds, string email, string password)
         {
+            // إنشاء المستخدم أولاً
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            var user = new User
+            {
+                Email = email,
+                PasswordHash = hashedPassword,
+                Role = "Student",
+                IsActive = true,
+                FullName = student.Name
+            };
+
+            await _unitOfWork.Users.AddAsync(user);
+            await _unitOfWork.CompleteAsync(); // حفظ للحصول على Id
+
+            // ربط الطالب بالمستخدم
+            student.UserId = user.Id;
             student.StudentSubjects = new List<StudentSubject>();
 
-            // ✅ استخدام filter بشكل صحيح
-            var subjects = await _unitOfWork.Subjects.GetAllAsync(
-                filter: sub => subjectIds.Contains(sub.Id)
-            );
-
+            var subjects = await _unitOfWork.Subjects.GetAllAsync(sub => subjectIds.Contains(sub.Id));
             foreach (var subject in subjects)
             {
                 student.StudentSubjects.Add(new StudentSubject
@@ -44,10 +56,13 @@ namespace StudentManagement.Services.Implementations
         {
             return await _unitOfWork.Students.GetAllAsync(
                 filter: s => !s.IsDeleted,
-                include: q => q.Include(s => s.StudentSubjects)
-                               .ThenInclude(ss => ss.Subject)
+                include: q => q
+                    .Include(s => s.User) 
+                    .Include(s => s.StudentSubjects)
+                        .ThenInclude(ss => ss.Subject)
             );
         }
+
 
         public async Task<Student?> GetStudentByIdAsync(int id)
         {
@@ -69,12 +84,7 @@ namespace StudentManagement.Services.Implementations
             existingStudent.DateOfBirth = student.DateOfBirth;
 
             existingStudent.StudentSubjects.Clear();
-
-            // ✅ استخدام filter الصحيح
-            var subjects = await _unitOfWork.Subjects.GetAllAsync(
-                filter: sub => subjectIds.Contains(sub.Id)
-            );
-
+            var subjects = await _unitOfWork.Subjects.GetAllAsync(sub => subjectIds.Contains(sub.Id));
             foreach (var subject in subjects)
             {
                 existingStudent.StudentSubjects.Add(new StudentSubject
@@ -96,6 +106,17 @@ namespace StudentManagement.Services.Implementations
 
             student.IsDeleted = true;
             _unitOfWork.Students.Update(student);
+
+            if (student.UserId.HasValue)
+            {
+                var user = await _unitOfWork.Users.GetByIdAsync(student.UserId.Value);
+                if (user != null)
+                {
+                    user.IsDeleted = true;
+                    _unitOfWork.Users.Update(user);
+                }
+            }
+
             await _unitOfWork.CompleteAsync();
         }
 
@@ -104,19 +125,67 @@ namespace StudentManagement.Services.Implementations
             return await _unitOfWork.Students.GetAllAsync(
                 filter: s => s.IsDeleted,
                 include: q => q.Include(s => s.StudentSubjects)
-                               .ThenInclude(ss => ss.Subject)
+                               .ThenInclude(ss => ss.Subject),
+                includeSoftDeleted: true
             );
         }
 
         public async Task RestoreStudentAsync(int id)
         {
-            var student = await _unitOfWork.Students.GetByIdAsync(id);
+            var student = await _unitOfWork.Students.GetByIdIncludingDeletedAsync(id);
             if (student == null)
                 throw new Exception("Student not found");
 
             student.IsDeleted = false;
             _unitOfWork.Students.Update(student);
+
+            if (student.UserId.HasValue)
+            {
+                var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(student.UserId.Value);
+                if (user != null)
+                {
+                    user.IsDeleted = false;
+                    _unitOfWork.Users.Update(user);
+                }
+            }
+
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task DeleteStudentPermanentlyAsync(int id)
+        {
+            var student = await _unitOfWork.Students.GetByIdIncludingDeletedAsync(id,
+                include: q => q.Include(s => s.StudentSubjects));
+
+            if (student == null)
+                throw new Exception("Student not found");
+
+            foreach (var ss in student.StudentSubjects.ToList())
+            {
+                _unitOfWork.StudentSubjects.Delete(ss);
+            }
+
+            _unitOfWork.Students.Delete(student);
+
+            if (student.UserId.HasValue)
+            {
+                var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(student.UserId.Value);
+                if (user != null)
+                {
+                    _unitOfWork.Users.Delete(user);
+                }
+            }
+
+            await _unitOfWork.CompleteAsync();
+        }
+        public async Task<Student?> GetStudentByEmailAsync(string email)
+        {
+            return await _unitOfWork.Students.GetFirstOrDefaultAsync(
+                filter: s => s.User != null && s.User.Email == email && !s.IsDeleted,
+                include: q => q.Include(s => s.User).Include(s => s.StudentSubjects).ThenInclude(ss => ss.Subject)
+            );
+        }
+
+
     }
 }

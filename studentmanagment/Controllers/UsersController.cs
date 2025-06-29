@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using StudentManagement.Core.Interfaces;
 using StudentManagement.Web.ViewModels;
 using System.Collections.Generic;
@@ -23,7 +24,6 @@ namespace StudentManagement.Web.Controllers
         {
             var allUsers = await _unitOfWork.Users.GetAllIncludingDeletedAsync();
 
-            // Apply search filter if provided
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.ToLower();
@@ -33,7 +33,6 @@ namespace StudentManagement.Web.Controllers
                 );
             }
 
-            // Apply role filter if provided
             if (!string.IsNullOrEmpty(roleFilter))
             {
                 allUsers = allUsers.Where(u => u.Role == roleFilter);
@@ -46,16 +45,14 @@ namespace StudentManagement.Web.Controllers
                 Search = search,
                 RoleFilter = roleFilter,
                 Users = userList,
-
                 TotalUsers = userList.Count,
-                TotalStudents = userList.Count(u => u.Role == "User"),
+                TotalStudents = userList.Count(u => u.Role == "Student"),
                 TotalTeachers = userList.Count(u => u.Role == "Teacher"),
                 DeletedCount = userList.Count(u => u.IsDeleted),
-
                 Roles = new List<SelectListItem>
                 {
                     new SelectListItem { Text = "جميع الصلاحيات", Value = "" },
-                    new SelectListItem { Text = "طالب", Value = "User" },
+                    new SelectListItem { Text = "طالب", Value = "Student" },
                     new SelectListItem { Text = "مدرس", Value = "Teacher" },
                     new SelectListItem { Text = "مدير", Value = "Admin" }
                 }
@@ -68,30 +65,77 @@ namespace StudentManagement.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SoftDelete(int id)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(id);
-            if (user == null)
-            {
+            var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(id, q =>
+                  q.Include(u => u.Student)
+                   .Include(u => u.Teacher)
+              ); if (user == null)
                 return NotFound();
-            }
 
             user.IsDeleted = true;
+
+            // حذف الطالب أو المدرس المرتبط
+            if (user.Role == "Student" && user.Student != null)
+                user.Student.IsDeleted = true;
+
+            if (user.Role == "Teacher" && user.Teacher != null)
+                user.Teacher.IsDeleted = true;
+
             await _unitOfWork.CompleteAsync();
+
+            TempData["Message"] = $"تم حذف المستخدم \"{user.FullName}\" مؤقتًا.";
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(id, q =>
+                  q.Include(u => u.Student)
+                   .Include(u => u.Teacher)
+              );
+            if (user == null)
+                return NotFound();
+
+            user.IsDeleted = false;
+
+            // استرجاع الطالب أو المدرس المرتبط
+            if (user.Role == "Student" && user.Student != null)
+                user.Student.IsDeleted = false;
+
+            if (user.Role == "Teacher" && user.Teacher != null)
+                user.Teacher.IsDeleted = false;
+
+            await _unitOfWork.CompleteAsync();
+
+            TempData["Message"] = $"تم استرجاع المستخدم \"{user.FullName}\" بنجاح.";
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Restore(int id)
+        public async Task<IActionResult> HardDelete(int id)
         {
-            var user = await _unitOfWork.Users.GetByIdAsync(id);
+            var user = await _unitOfWork.Users.GetByIdIncludingDeletedAsync(id, q =>
+                  q.Include(u => u.Student)
+                   .Include(u => u.Teacher)
+              );
             if (user == null)
-            {
                 return NotFound();
-            }
 
-            user.IsDeleted = false;
+            // حذف الطالب أو المدرس المرتبط أولًا
+            if (user.Role == "Student" && user.Student != null)
+                _unitOfWork.Students.Delete(user.Student);
+
+            if (user.Role == "Teacher" && user.Teacher != null)
+                _unitOfWork.Teachers.Delete(user.Teacher);
+
+            _unitOfWork.Users.Delete(user);
             await _unitOfWork.CompleteAsync();
+
+            TempData["Message"] = $"تم حذف المستخدم \"{user.FullName}\" نهائيًا.";
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

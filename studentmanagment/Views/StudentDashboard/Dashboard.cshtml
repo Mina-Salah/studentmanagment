@@ -1,10 +1,303 @@
-﻿@{
-    ViewData["Title"] = "Student Dashboard";
+﻿@model StudentManagement.Core.Entities.Student
+
+@{
+    ViewData["Title"] = "Creative Student Dashboard";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
 }
 
-<h2>مرحبًا بك في لوحة تحكم الطالب</h2>
+<div class="dashboard-wrapper">
+    <header class="dashboard-header">
+        <h1>Welcome, @Model.Name!</h1>
+       
+        <p>Your learning progress at a glance</p>
+    </header>
 
-<div class="mt-4">
-    <a class="btn btn-info" href="@Url.Action("Index", "Courses")">عرض الكورسات</a>
-    <a class="btn btn-secondary" href="@Url.Action("MyCourses", "StudentDashboard")">كورساتي</a>
+    <section class="shapes-background">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-square"></div>
+        <div class="shape shape-triangle"></div>
+        <div class="shape shape-hexagon"></div>
+    </section>
+
+    <section class="cards-container">
+
+        <div class="card card-progress animate__animated animate__fadeInUp">
+            <h3>Course Completion</h3>
+            <canvas id="completionChart" height="180"></canvas>
+            <p><strong>6/8</strong> Courses completed</p>
+        </div>
+
+        <div class="card card-activity animate__animated animate__fadeInUp animate__delay-1s">
+            <h3>Weekly Activity</h3>
+            <canvas id="activityChart" height="180"></canvas>
+            <p>You studied <strong>12 hours</strong> this week</p>
+        </div>
+
+        <div class="card card-performance animate__animated animate__fadeInUp animate__delay-2s">
+            <h3>Quiz Scores</h3>
+            <canvas id="quizChart" height="180"></canvas>
+            <p>Average score: <strong>85%</strong></p>
+        </div>
+
+    </section>
 </div>
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #8EC5FC 0%, #E0C3FC 100%);
+        overflow-x: hidden;
+        color: #222;
+    }
+
+    .dashboard-wrapper {
+        max-width: 1200px;
+        margin: 3rem auto 5rem auto;
+        padding: 0 1rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        color: #2c3e50;
+        text-shadow: 0 0 5px rgba(255 255 255 / 0.7);
+    }
+
+        .dashboard-header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            margin-bottom: 0.3rem;
+        }
+
+        .dashboard-header p {
+            font-size: 1.3rem;
+            font-weight: 500;
+            opacity: 0.85;
+        }
+
+    /* الأشكال الهندسية الخلفية */
+    .shapes-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        pointer-events: none;
+        overflow: visible;
+    }
+
+    .shape {
+        position: absolute;
+        opacity: 0.15;
+        filter: drop-shadow(0 0 5px rgba(0,0,0,0.1));
+        animation: floatUpDown 6s ease-in-out infinite alternate;
+        border-radius: 12px;
+    }
+
+    .shape-circle {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: #6a11cb;
+        top: 10%;
+        left: 5%;
+        animation-delay: 0s;
+    }
+
+    .shape-square {
+        width: 140px;
+        height: 140px;
+        background: #2575fc;
+        top: 30%;
+        right: 7%;
+        animation-delay: 2s;
+    }
+
+    .shape-triangle {
+        width: 0;
+        height: 0;
+        border-left: 70px solid transparent;
+        border-right: 70px solid transparent;
+        border-bottom: 120px solid #ff6a00;
+        top: 55%;
+        left: 15%;
+        animation-delay: 4s;
+        border-radius: 0;
+    }
+
+    .shape-hexagon {
+        width: 140px;
+        height: 80px;
+        background: #ff3c78;
+        clip-path: polygon( 25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50% );
+        top: 70%;
+        right: 20%;
+        animation-delay: 1s;
+    }
+
+    @@keyframes floatUpDown {
+        0%
+
+    {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(15px);
+    }
+
+    }
+
+    /* Cards container */
+    .cards-container {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Individual cards */
+    .card {
+        background: #ffffffcc;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border-radius: 20px;
+        padding: 2rem;
+        width: 350px;
+        text-align: center;
+        color: #34495e;
+        backdrop-filter: blur(12px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: default;
+    }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            font-size: 1.7rem;
+            color: #1e2022;
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .card p {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+    /* Buttons styling for future use */
+    .btn-dashboard {
+        background: #6a11cb;
+        color: white;
+        padding: 0.8rem 1.6rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 8px 15px rgba(106, 17, 203, 0.3);
+        transition: background-color 0.3s ease;
+        margin-top: 1.5rem;
+    }
+
+        .btn-dashboard:hover {
+            background-color: #2575fc;
+        }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Completion Doughnut Chart
+        const ctxCompletion = document.getElementById('completionChart').getContext('2d');
+        const completionChart = new Chart(ctxCompletion, {
+            type: 'doughnut',
+            data: {
+                labels: ['Completed', 'Remaining'],
+                datasets: [{
+                    label: 'Courses',
+                    data: [6, 2],
+                    backgroundColor: ['#6a11cb', '#d4d4d8'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '75%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+
+        // Weekly Activity Bar Chart
+        const ctxActivity = document.getElementById('activityChart').getContext('2d');
+        const activityChart = new Chart(ctxActivity, {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Hours Studied',
+                    data: [2, 1.5, 3, 2.5, 1, 1.5, 1.5],
+                    backgroundColor: '#2575fc',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true, max: 4, ticks: { stepSize: 1 } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+
+        // Quiz Scores Line Chart
+        const ctxQuiz = document.getElementById('quizChart').getContext('2d');
+        const quizChart = new Chart(ctxQuiz, {
+            type: 'line',
+            data: {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Score %',
+                    data: [80, 88, 85, 90],
+                    fill: false,
+                    borderColor: '#ff3c78',
+                    tension: 0.3,
+                    pointBackgroundColor: '#ff3c78',
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: { stepSize: 10 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: true }
+                }
+            }
+        });
+    </script>
+}

@@ -40,6 +40,15 @@
                             </div>
                             <span asp-validation-for="Address" class="text-danger mt-1 d-block"></span>
                         </div>
+                        <div class="form-group mb-4">
+                            <label asp-for="Email" class="form-label fw-bold">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input asp-for="Email" class="form-control" placeholder="Enter student's email" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger mt-1 d-block"></span>
+                        </div>
+
                     </div>
 
                     <div class="col-md-6">
@@ -64,12 +73,9 @@
                                             <div class="col-md-6 mb-2">
                                                 <div class="subject-item p-2 rounded @isSelected" onclick="toggleCheckbox(this)">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox"
-                                                               name="Subjects[@i].IsSelected" value="true"
-                                                               id="subject_@subject.Id"
-                                                        @(subject.IsSelected ? "checked" : "") />
-                                                        <input type="hidden" name="Subjects[@i].Id" value="@subject.Id" />
-                                                        <input type="hidden" name="Subjects[@i].Name" value="@subject.Name" />
+                                                        <input asp-for="Subjects[@i].IsSelected" class="form-check-input" type="checkbox" id="subject_@subject.Id" />
+                                                        <input asp-for="Subjects[@i].Id" type="hidden" />
+                                                        <input asp-for="Subjects[@i].Name" type="hidden" />
                                                         <label class="form-check-label" for="subject_@subject.Id">
                                                             @subject.Name
                                                         </label>

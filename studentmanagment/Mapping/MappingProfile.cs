@@ -15,8 +15,9 @@ namespace StudentManagement.Core.Mapping
         public MappingProfile()
         {
             // Student
-            CreateMap<StudentFormViewModel, Student>()
-                .ForMember(dest => dest.StudentSubjects, opt => opt.Ignore());
+            CreateMap<Student, StudentFormViewModel>()
+        .ForMember(dest => dest.Subjects, opt => opt.Ignore())
+        .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email)); // ✅ هذا السطر مهم
 
             CreateMap<Student, StudentFormViewModel>()
                 .ForMember(dest => dest.Subjects, opt => opt.Ignore());
@@ -33,7 +34,7 @@ namespace StudentManagement.Core.Mapping
             CreateMap<Category, CategoryViewModel>().ReverseMap();
 
             CreateMap<Course, CourseViewModel>()
-      .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.FullName))
+      .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.Teacher.Name))
       .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
 
             CreateMap<CourseViewModel, Course>();

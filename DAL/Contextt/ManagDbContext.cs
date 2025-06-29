@@ -76,14 +76,25 @@ public class ManagDbContext : DbContext
             .HasKey(sq => sq.Id);
 
         modelBuilder.Entity<StudentQuiz>()
-            .HasOne(sq => sq.Student)
-            .WithMany(s => s.StudentQuizzes)
-            .HasForeignKey(sq => sq.StudentId);
-
-        modelBuilder.Entity<StudentQuiz>()
             .HasOne(sq => sq.Quiz)
             .WithMany(q => q.StudentQuizzes)
             .HasForeignKey(sq => sq.QuizId);
+
+        // ✅ ✅ ✅ هذه العلاقات هي الأهم 👇
+
+        // علاقة 1-1: الطالب يملك مستخدم
+        modelBuilder.Entity<Student>()
+            .HasOne(s => s.User)
+            .WithOne(u => u.Student)
+            .HasForeignKey<Student>(s => s.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // علاقة 1-1: المدرس يملك مستخدم
+        modelBuilder.Entity<Teacher>()
+            .HasOne(t => t.User)
+            .WithOne(u => u.Teacher)
+            .HasForeignKey<Teacher>(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // === Quiz - Lesson Relation ===
         modelBuilder.Entity<Quiz>()
@@ -120,10 +131,9 @@ public class ManagDbContext : DbContext
             .HasForeignKey(a => a.LessonId)
             .OnDelete(DeleteBehavior.Cascade);
 
-      
         modelBuilder.Entity<VideoAccess>()
             .HasOne(va => va.Student)
-            .WithMany() // لو عايز تضيف علاقة عكسية للطالب يمكن استخدامها هنا
+            .WithMany()
             .HasForeignKey(va => va.StudentId);
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Core.Entities;
+using StudentManagement.Core.Interfaces;
 using StudentManagement.Services.Interfaces;
 using StudentManagement.Web.ViewModels;
 
@@ -11,72 +12,88 @@ namespace StudentManagement.Web.Controllers
     public class TeachersController : Controller
     {
         private readonly ITeacherService _teacherService;
+        private readonly IUserService _userService;
         private readonly IAuthService _authService;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public TeachersController(
             ITeacherService teacherService,
+            IUserService userService,
             IAuthService authService,
+            IUnitOfWork unitOfWork,
             IMapper mapper)
         {
             _teacherService = teacherService;
+            _userService = userService;
             _authService = authService;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         public async Task<IActionResult> Index()
         {
             var teachers = await _teacherService.GetAllTeachersAsync();
-            var viewModels = _mapper.Map<IEnumerable<TeacherViewModel>>(teachers);
+            var viewModels = _mapper.Map<List<TeacherViewModel>>(teachers);
             return View(viewModels);
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TeacherViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            // إنشاء حساب المستخدم للمدرس
-            var success = await _authService.RegisterAsync(model.Email, model.Password, "Teacher", model.FullName);
-
-            if (!success)
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Password))
             {
-                ModelState.AddModelError("", "Email is already registered.");
+                if (string.IsNullOrWhiteSpace(model.Password))
+                    ModelState.AddModelError("Password", "كلمة المرور مطلوبة.");
+
                 return View(model);
             }
 
-            // الحصول على المستخدم المرتبط بالإيميل
+            if (await _userService.IsEmailTakenAsync(model.Email))
+            {
+                ModelState.AddModelError("Email", "هذا الإيميل مستخدم بالفعل.");
+                return View(model);
+            }
+
+            var success = await _authService.RegisterAsync(model.Email, model.Password, "Teacher", model.Name);
+            if (!success)
+            {
+                ModelState.AddModelError("", "فشل في إنشاء الحساب.");
+                return View(model);
+            }
+
             var user = await _authService.GetUserByEmailAsync(model.Email);
             if (user == null)
             {
-                ModelState.AddModelError("", "Error creating user account.");
+                ModelState.AddModelError("", "لم يتم العثور على المستخدم بعد التسجيل.");
                 return View(model);
             }
 
-            // ربط المدرس بالمستخدم
             var teacher = _mapper.Map<Teacher>(model);
             teacher.UserId = user.Id;
 
-            await _teacherService.AddTeacherAsync(teacher);
+            await _teacherService.CreateTeacherAsync(teacher, model.Email, model.Password);
 
-            TempData["Success"] = "Teacher created successfully.";
+            TempData["SuccessMessage"] = $"تم إنشاء المدرس بنجاح. البريد: {model.Email}، كلمة السر: {model.Password}";
             return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int id)
         {
             var teacher = await _teacherService.GetTeacherByIdAsync(id);
-            if (teacher == null)
-                return NotFound();
+            if (teacher == null) return NotFound();
 
             var viewModel = _mapper.Map<TeacherViewModel>(teacher);
+
+            var user = (await _unitOfWork.Users.GetAllAsync())
+                .FirstOrDefault(u => u.FullName == teacher.Name&& u.Role == "Teacher");
+
+            if (user != null)
+                viewModel.Email = user.Email;
+
             return View(viewModel);
         }
 
@@ -88,19 +105,87 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
 
             var teacher = _mapper.Map<Teacher>(model);
-            await _teacherService.UpdateTeacherAsync(teacher);
+            var user = (await _unitOfWork.Users.GetAllAsync())
+                .FirstOrDefault(u => u.FullName == model.Name && u.Role == "Teacher");
 
-            TempData["Success"] = "Teacher updated successfully.";
+            if (user != null && user.Email.ToLower() != model.Email.ToLower() &&
+                await _userService.IsEmailTakenAsync(model.Email))
+            {
+                ModelState.AddModelError("Email", "هذا الإيميل مستخدم بالفعل.");
+                return View(model);
+            }
+
+            await _teacherService.UpdateTeacherAsync(model.Id, teacher);
+
+            if (user != null)
+            {
+                user.Email = model.Email;
+                user.FullName = model.Name;
+                _unitOfWork.Users.Update(user);
+                await _unitOfWork.CompleteAsync();
+            }
+
+            TempData["SuccessMessage"] = "تم تحديث بيانات المدرس بنجاح.";
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _teacherService.DeleteTeacherAsync(id);
-            TempData["Success"] = "Teacher deleted.";
+            try
+            {
+                await _teacherService.DeleteTeacherAsync(id);
+                TempData["SuccessMessage"] = "تم حذف المدرس بنجاح.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"حدث خطأ أثناء الحذف: {ex.Message}";
+            }
+
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Deleted()
+        {
+            var deletedTeachers = await _teacherService.GetDeletedTeachersAsync();
+            var viewModels = _mapper.Map<List<TeacherViewModel>>(deletedTeachers);
+            return View(viewModels);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            try
+            {
+                await _teacherService.RestoreTeacherAsync(id);
+                TempData["SuccessMessage"] = "تم استرجاع المدرس بنجاح.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"حدث خطأ أثناء الاسترجاع: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Deleted));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePermanent(int id)
+        {
+            try
+            {
+                await _teacherService.DeleteTeacherPermanentlyAsync(id);
+                TempData["SuccessMessage"] = "تم حذف المدرس نهائيًا.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"حدث خطأ أثناء الحذف النهائي: {ex.Message}";
+            }
+
+            return RedirectToAction(nameof(Deleted));
         }
     }
 }

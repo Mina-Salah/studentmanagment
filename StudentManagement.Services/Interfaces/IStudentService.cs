@@ -4,7 +4,8 @@ namespace StudentManagement.Services.Interfaces
     public interface IStudentService
     {
         // Asynchronous method for creating a new student with a list of associated subject IDs
-        Task CreateStudentAsync(Student student, List<int> subjectIds);
+        // تعديل الميثود CreateStudentAsync لتأخذ email و password أيضًا:
+        Task CreateStudentAsync(Student student, List<int> subjectIds, string email, string password);
 
         Task<IEnumerable<Student>> GetAllStudentsAsync();
 
@@ -17,5 +18,8 @@ namespace StudentManagement.Services.Interfaces
         Task<IEnumerable<Student>> GetDeletedStudentsAsync();
 
         Task RestoreStudentAsync(int id);
+
+        Task DeleteStudentPermanentlyAsync(int id);
+        Task<Student?> GetStudentByEmailAsync(string email);
     }
 }
