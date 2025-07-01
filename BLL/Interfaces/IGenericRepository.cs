@@ -6,14 +6,13 @@ public interface IGenericRepository<T> where T : class
         Expression<Func<T, bool>>? filter = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
         Func<IQueryable<T>, IQueryable<T>>? include = null,
-        bool includeSoftDeleted = false // ✅ أضف هذا
+        bool includeSoftDeleted = false
     );
 
     Task<T?> GetByIdAsync(
         int id,
         Func<IQueryable<T>, IQueryable<T>>? include = null
     );
-
 
     Task<T?> GetFirstOrDefaultAsync(
         Expression<Func<T, bool>>? filter = null,
@@ -29,7 +28,8 @@ public interface IGenericRepository<T> where T : class
     Task<bool> ExistsAsync(int id);
 
     Task<IEnumerable<T>> GetAllIncludingDeletedAsync();
-    Task<T?> GetByIdIncludingDeletedAsync( int id, Func<IQueryable<T>, IQueryable<T>>? include = null
-);
+    Task<T?> GetByIdIncludingDeletedAsync(int id, Func<IQueryable<T>, IQueryable<T>>? include = null);
 
+    // ✅ الدالة الجديدة
+    Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
 }

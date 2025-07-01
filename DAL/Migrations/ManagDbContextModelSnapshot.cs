@@ -224,9 +224,18 @@ namespace StudentManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("TeacherEmail")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("TeacherId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -237,6 +246,10 @@ namespace StudentManagement.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("CourseVideos");
                 });
@@ -883,6 +896,22 @@ namespace StudentManagement.Data.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("StudentManagement.Core.Entities.Course_file.CourseVideo", b =>
+                {
+                    b.HasOne("StudentManagement.Core.Entities.Course_file.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId");
+
+                    b.HasOne("Teacher", "Teacher")
+                        .WithMany("CourseVideos")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("StudentManagement.Core.Entities.Course_file.VideoAccess", b =>
                 {
                     b.HasOne("StudentManagement.Core.Entities.Course_file.CourseVideo", "CourseVideo")
@@ -1202,6 +1231,8 @@ namespace StudentManagement.Data.Migrations
 
             modelBuilder.Entity("Teacher", b =>
                 {
+                    b.Navigation("CourseVideos");
+
                     b.Navigation("Courses");
                 });
 #pragma warning restore 612, 618

@@ -30,10 +30,7 @@ namespace StudentManagement.Web.ViewModels
         public string? TeacherName { get; set; }
         public string? CategoryName { get; set; }
 
-        public IEnumerable<Teacher>? Teachers { get; set; }
-        public IEnumerable<Category>? Categories { get; set; }
+        public IEnumerable<Teacher> Teachers { get; set; } = new List<Teacher>();
+        public IEnumerable<Category> Categories { get; set; } = new List<Category>();
     }
-
-
-
 }

@@ -135,5 +135,13 @@ public class ManagDbContext : DbContext
             .HasOne(va => va.Student)
             .WithMany()
             .HasForeignKey(va => va.StudentId);
+        // teacher and course video
+        modelBuilder.Entity<CourseVideo>()
+        .HasOne(cv => cv.Teacher)
+        .WithMany(t => t.CourseVideos)
+        .HasForeignKey(cv => cv.TeacherId)
+        .OnDelete(DeleteBehavior.Restrict); // أو حسب ما يناسبك
+
+
     }
 }

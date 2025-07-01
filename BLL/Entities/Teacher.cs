@@ -15,6 +15,7 @@ public class Teacher
     public User? User { get; set; }
 
     public ICollection<Course>? Courses { get; set; }
+    public ICollection<CourseVideo> CourseVideos { get; set; }
 
     public bool IsDeleted { get; set; } = false;
 }

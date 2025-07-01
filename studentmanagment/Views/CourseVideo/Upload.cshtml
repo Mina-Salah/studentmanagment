@@ -15,13 +15,20 @@
 
     <div class="mb-3">
         <label asp-for="VideoFile" class="form-label"></label>
-        <input asp-for="VideoFile" type="file" class="form-control" />
+        <input asp-for="VideoFile" class="form-control" type="file" />
         <span asp-validation-for="VideoFile" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-success">
-        <i class="bi bi-upload"></i> Upload
-    </button>
+    <div class="mb-3">
+        <label asp-for="CourseId" class="form-label">اختر الكورس</label>
+        <select asp-for="CourseId" class="form-control"
+                asp-items="@(new SelectList(Model.Courses, "Id", "Title"))">
+            <option value="">-- اختر كورس --</option>
+        </select>
+        <span asp-validation-for="CourseId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">رفع الفيديو</button>
 </form>
 
 @section Scripts {

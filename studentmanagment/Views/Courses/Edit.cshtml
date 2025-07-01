@@ -36,7 +36,7 @@
     <div class="form-group mb-3">
         <label asp-for="TeacherId" class="form-label">Teacher</label>
         <select asp-for="TeacherId" class="form-control"
-                asp-items="@(new SelectList(Model.Teachers, "Id", "FullName", Model.TeacherId))">
+                asp-items="@(new SelectList(Model.Teachers, "Id", "Name", Model.TeacherId))">
             <option value="">-- Select Teacher --</option>
         </select>
         <span asp-validation-for="TeacherId" class="text-danger"></span>

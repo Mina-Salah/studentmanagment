@@ -57,5 +57,15 @@ namespace StudentManagement.Services.Implementations
                 await _unitOfWork.CompleteAsync();
             }
         }
+
+        public async Task<List<Course>> GetCoursesByTeacherEmailAsync(string email)
+        {
+            var courses = await _unitOfWork.Courses.GetAllAsync(
+                filter: c => c.Teacher != null && c.Teacher.Email == email,
+                include: q => q.Include(c => c.Teacher)
+            );
+
+            return courses.ToList();
+        }
     }
 }

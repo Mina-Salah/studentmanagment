@@ -14,5 +14,7 @@ namespace StudentManagement.Services.Interfaces
         Task AddCourseAsync(Course course);
         Task UpdateCourseAsync(Course course);
         Task DeleteCourseAsync(int id);
+        Task<List<Course>> GetCoursesByTeacherEmailAsync(string email);
+
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
-using StudentManagement.Core.Entities;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using StudentManagement.Core.Entities.Course_file;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+
 
 namespace StudentManagement.Web.ViewModels
 {
@@ -13,5 +15,10 @@ namespace StudentManagement.Web.ViewModels
         [Required(ErrorMessage = "حدد ملف الفيديو")]
         [DataType(DataType.Upload)]
         public IFormFile? VideoFile { get; set; }
+
+        [Required(ErrorMessage = "اختر الكورس")]
+        public int CourseId { get; set; }
+
+        public IEnumerable<Course>? Courses { get; set; }
     }
 }

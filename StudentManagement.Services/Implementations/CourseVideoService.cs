@@ -1,4 +1,5 @@
-﻿using StudentManagement.Core.Entities.Course_file;
+﻿using Microsoft.EntityFrameworkCore;
+using StudentManagement.Core.Entities.Course_file;
 using StudentManagement.Core.Interfaces;
 using StudentManagement.Services.Interfaces;
 using StudentManagement.Web.ViewModels;
@@ -19,11 +20,14 @@ namespace StudentManagement.Services.Implementations
             if (string.IsNullOrWhiteSpace(email))
                 return new List<CourseVideo>();
 
-            var allVideos = await _unitOfWork.CourseVideos.GetAllAsync();
-            return allVideos
-                .Where(v => v.TeacherEmail == email)
-                .ToList();
+            var videos = await _unitOfWork.CourseVideos.GetAllAsync(
+                filter: v => v.Teacher.Email == email,
+                include: q => q.Include(v => v.Teacher)
+            );
+
+            return videos.ToList();
         }
+
 
         public async Task UploadVideoAsync(UploadVideoViewModel model, string teacherEmail, string webRootPath)
         {
@@ -39,15 +43,47 @@ namespace StudentManagement.Services.Implementations
                 await model.VideoFile.CopyToAsync(stream);
             }
 
+            // 🟢 نجيب المدرس عشان نحدد الـ TeacherId
+            var teacher = await _unitOfWork.Teachers.GetFirstOrDefaultAsync(t => t.Email == teacherEmail);
+            if (teacher == null)
+                throw new Exception("لم يتم العثور على المدرس");
+
             var video = new CourseVideo
             {
                 Title = model.Title,
                 VideoPath = "/videos/" + fileName,
-                TeacherEmail = teacherEmail
+                TeacherEmail = teacherEmail,
+                TeacherId = teacher.Id,
+                CourseId = model.CourseId
             };
 
             await _unitOfWork.CourseVideos.AddAsync(video);
             await _unitOfWork.CompleteAsync();
         }
+        public async Task<List<Course>> GetCoursesByTeacherEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return new List<Course>();
+
+            var courses = await _unitOfWork.Courses.GetAllAsync(
+                filter: c => c.Teacher != null && c.Teacher.Email == email,
+                include: q => q.Include(c => c.Teacher)
+            );
+
+            return courses.ToList();
+        }
+
+
+        public async Task<int> GetVideoCountByTeacherAsync(string email)
+        {
+            var videos = await _unitOfWork.CourseVideos.GetAllAsync(
+                filter: v => v.Teacher.Email == email && !v.IsDeleted,
+                include: q => q.Include(v => v.Teacher)
+            );
+
+            return videos.Count();
+        }
+
+
     }
 }
