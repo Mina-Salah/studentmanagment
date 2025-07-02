@@ -1,56 +1,71 @@
-@model StudentManagement.Web.ViewModels.CourseViewModel
+﻿@model StudentManagement.Web.ViewModels.CourseViewModel
 
 @{
-    ViewBag.Title = "Create Course";
+    ViewBag.Title = "إضافة كورس جديد";
 }
 
-<h2>Create Course</h2>
+<h2 class="mb-4">إضافة كورس جديد</h2>
 
 <form asp-action="Create" method="post">
     <div class="form-group mb-3">
-        <label asp-for="Title" class="form-label"></label>
+        <label asp-for="Title" class="form-label">عنوان الكورس</label>
         <input asp-for="Title" class="form-control" />
         <span asp-validation-for="Title" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="Description" class="form-label"></label>
+        <label asp-for="Description" class="form-label">الوصف</label>
         <textarea asp-for="Description" class="form-control"></textarea>
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="StartDate" class="form-label"></label>
+        <label asp-for="StartDate" class="form-label">تاريخ البداية</label>
         <input asp-for="StartDate" type="date" class="form-control" />
         <span asp-validation-for="StartDate" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-3">
-        <label asp-for="EndDate" class="form-label"></label>
+        <label asp-for="EndDate" class="form-label">تاريخ النهاية</label>
         <input asp-for="EndDate" type="date" class="form-control" />
         <span asp-validation-for="EndDate" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">ww
-        <label asp-for="TeacherId" class="form-label">Teacher</label>
-        <select asp-for="TeacherId" class="form-control"
-                asp-items="@(new SelectList(Model.Teachers, "Id", "Name"))">
-            <option value="">-- Select Teacher --</option>
-        </select>
-        <span asp-validation-for="TeacherId" class="text-danger"></span>
+    <!-- ✅ اختيار المدرسين باستخدام CheckBoxes -->
+    <div class="form-group mb-3">
+        <label class="form-label">اختر المدرسين</label>
+        <div class="row">
+            @foreach (var teacher in Model.Teachers)
+            {
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="SelectedTeacherIds"
+                               value="@teacher.Id"
+                               id="teacher_@teacher.Id"
+                        @(Model.SelectedTeacherIds.Contains(teacher.Id) ? "checked" : "") />
+                        <label class="form-check-label" for="teacher_@teacher.Id">
+                            @teacher.Name
+                        </label>
+                    </div>
+                </div>
+            }
+        </div>
+        <span asp-validation-for="SelectedTeacherIds" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-4">
-        <label asp-for="CategoryId" class="form-label">Category</label>
+        <label asp-for="CategoryId" class="form-label">التصنيف</label>
         <select asp-for="CategoryId" class="form-control"
                 asp-items="@(new SelectList(Model.Categories, "Id", "Name"))">
-            <option value="">-- Select Category --</option>
+            <option value="">-- اختر التصنيف --</option>
         </select>
         <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary">حفظ</button>
+    <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
 </form>
 
 @section Scripts {

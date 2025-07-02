@@ -20,21 +20,21 @@ namespace StudentManagement.Data.UnitOfWork
             Courses = new GenericRepository<Course>(_context);
             Categories = new GenericRepository<Category>(_context);
             Teachers = new GenericRepository<Teacher>(_context);
-            CourseVideos = new GenericRepository<CourseVideo>(_context); // ✅
-            VideoAccesses = new GenericRepository<VideoAccess>(_context); // ✅
+            CourseVideos = new GenericRepository<CourseVideo>(_context);
+            VideoAccesses = new GenericRepository<VideoAccess>(_context);
+            CourseTeachers = new GenericRepository<CourseTeacher>(_context);
         }
 
         public IGenericRepository<Student> Students { get; private set; }
         public IGenericRepository<Subject> Subjects { get; private set; }
         public IGenericRepository<StudentSubject> StudentSubjects { get; private set; }
-        public IGenericRepository<User> Users { get; private set; } 
+        public IGenericRepository<User> Users { get; private set; }
         public IGenericRepository<Course> Courses { get; }
         public IGenericRepository<CourseVideo> CourseVideos { get; private set; }
         public IGenericRepository<VideoAccess> VideoAccesses { get; private set; }
-
         public IGenericRepository<Category> Categories { get; private set; }
         public IGenericRepository<Teacher> Teachers { get; private set; }
-
+        public IGenericRepository<CourseTeacher> CourseTeachers { get; private set; }
 
         public async Task<int> CompleteAsync()
         {

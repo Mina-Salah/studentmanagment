@@ -9,6 +9,7 @@ namespace StudentManagement.Services.Interfaces
         Task<int> GetVideoCountByTeacherAsync(string email);
 
         Task<List<Course>> GetCoursesByTeacherEmailAsync(string email);
+        Task AddVideoAsync(CourseVideo video);
 
         Task UploadVideoAsync(UploadVideoViewModel model, string teacherEmail, string webRootPath);
     }

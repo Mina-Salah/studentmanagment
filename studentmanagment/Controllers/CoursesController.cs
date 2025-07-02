@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudentManagement.Core.Entities.Course_file;
 using StudentManagement.Services.Interfaces;
+using StudentManagement.Web.Helpers;
 using StudentManagement.Web.ViewModels;
 
 namespace StudentManagement.Web.Controllers
@@ -66,6 +67,7 @@ namespace StudentManagement.Web.Controllers
             return View(viewModel);
         }
 
+
         // POST: /Courses/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -79,9 +81,21 @@ namespace StudentManagement.Web.Controllers
             }
 
             var course = _mapper.Map<Course>(model);
+
+            course.CourseTeachers = model.SelectedTeacherIds.Select(tid => new CourseTeacher
+            {
+                TeacherId = tid,
+                Course = course
+            }).ToList();
+
             await _courseService.AddCourseAsync(course);
+
+            // ✅ إنشاء مجلد الكورس
+            var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos");
+            FileHelper.CreateCourseFolder(wwwRootPath, course.Title);
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: /Courses/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -91,11 +105,19 @@ namespace StudentManagement.Web.Controllers
                 return NotFound();
 
             var viewModel = _mapper.Map<CourseViewModel>(course);
+
+            // ⬅️ حدد المدرسين المرتبطين بالكورس الحالي
+            viewModel.SelectedTeacherIds = course.CourseTeachers?
+                .Select(ct => ct.TeacherId)
+                .ToList() ?? new List<int>();
+
             viewModel.Teachers = await _teacherService.GetAllTeachersAsync();
             viewModel.Categories = await _categoryService.GetAllCategoriesAsync();
 
             return View(viewModel);
         }
+
+
 
         // POST: /Courses/Edit/5
         [HttpPost]
@@ -112,10 +134,48 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
             }
 
-            var course = _mapper.Map<Course>(model);
-            await _courseService.UpdateCourseAsync(course);
+            var courseInDb = await _courseService.GetCourseByIdAsync(id);
+            if (courseInDb == null)
+                return NotFound();
+
+            string oldTitle = courseInDb.Title;
+
+            // تحديث البيانات
+            courseInDb.Title = model.Title;
+            courseInDb.Description = model.Description;
+            courseInDb.StartDate = model.StartDate;
+            courseInDb.EndDate = model.EndDate;
+            courseInDb.CategoryId = model.CategoryId;
+
+            // تحديث المدرسين
+            courseInDb.CourseTeachers.Clear();
+            courseInDb.CourseTeachers = model.SelectedTeacherIds.Select(tid => new CourseTeacher
+            {
+                CourseId = courseInDb.Id,
+                TeacherId = tid
+            }).ToList();
+
+            await _courseService.UpdateCourseAsync(courseInDb);
+
+            // ✅ تحديث المجلد إذا تغير الاسم
+            var wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos");
+            var oldFolder = Path.Combine(wwwRootPath, oldTitle);
+            var newFolder = Path.Combine(wwwRootPath, model.Title);
+
+            if (oldTitle != model.Title && Directory.Exists(oldFolder))
+            {
+                Directory.Move(oldFolder, newFolder);
+            }
+            else if (!Directory.Exists(newFolder))
+            {
+                FileHelper.CreateCourseFolder(wwwRootPath, model.Title);
+            }
+
             return RedirectToAction(nameof(Index));
         }
+
+
+
 
         // POST: /Courses/Delete/5
         [HttpPost]
@@ -129,14 +189,14 @@ namespace StudentManagement.Web.Controllers
         // 🔧 Private helper for filtering logic
         private IEnumerable<Course> ApplyFilters(IEnumerable<Course> courses, string? search, int? categoryId, string? sortOrder)
         {
-            var list = courses.ToList(); // تأكد إنها In-Memory
+            var list = courses.ToList();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim().ToLower();
                 list = list.Where(c =>
                     (!string.IsNullOrEmpty(c.Title) && c.Title.ToLower().Contains(search)) ||
-                    (!string.IsNullOrEmpty(c.Teacher?.Name) && c.Teacher.Name.ToLower().Contains(search))
+                    c.CourseTeachers.Any(ct => ct.Teacher.Name.ToLower().Contains(search))
                 ).ToList();
             }
 
@@ -152,6 +212,7 @@ namespace StudentManagement.Web.Controllers
 
             return list;
         }
+
 
     }
 }

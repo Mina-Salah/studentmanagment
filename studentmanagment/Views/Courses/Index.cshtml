@@ -24,16 +24,16 @@
     <div class="col-md-3">
         <label for="categoryId" class="form-label fw-semibold">
             <i class="bi bi-tags"></i> Category
-        </label>
-        <select name="categoryId" id="categoryId" class="form-select" onchange="submitFilterForm()">
-            <option value="">-- All Categories --</option>
-            @foreach (var category in categories!)
-            {
-                <option value="@category.Id" selected="@(category.Id == currentCategory)">
-                    @category.Name
-                </option>
-            }
-        </select>
+            <select name="categoryId" id="categoryId" class="form-select" onchange="submitFilterForm()">
+                <option value="">-- All Categories --</option>
+                @foreach (var category in categories!)
+                {
+                    <option value="@category.Id" selected="@(category.Id == currentCategory ? "selected" : null)">
+                        @category.Name
+                    </option>
+                }
+            </select>
+
     </div>
 
     <div class="col-md-3">
@@ -41,10 +41,11 @@
             <i class="bi bi-sort-down-alt"></i> Sort By
         </label>
         <select name="sortOrder" id="sortOrder" class="form-select" onchange="submitFilterForm()">
-            <option value="">Title (A-Z)</option>
-            <option value="start_asc" selected="@(currentSort == "start_asc")">Start Date ↑</option>
-            <option value="start_desc" selected="@(currentSort == "start_desc")">Start Date ↓</option>
+            <option value="" selected="@(string.IsNullOrEmpty(currentSort) ? "selected" : null)">Title (A-Z)</option>
+            <option value="start_asc" selected="@(currentSort == "start_asc" ? "selected" : null)">Start Date ↑</option>
+            <option value="start_desc" selected="@(currentSort == "start_desc" ? "selected" : null)">Start Date ↓</option>
         </select>
+
     </div>
 </form>
 
@@ -63,7 +64,7 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-               function submitFilterForm() {
+        function submitFilterForm() {
             let formData = $("#filterForm").serialize();
             $.get("/Courses/FilterCourses", formData, function (result) {
                 $("#courseTableContainer").html(result);

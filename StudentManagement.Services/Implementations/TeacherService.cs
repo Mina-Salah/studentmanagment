@@ -130,4 +130,13 @@ public class TeacherService : ITeacherService
 
         await _unitOfWork.CompleteAsync();
     }
+
+    public async Task<Teacher?> GetTeacherByEmailAsync(string email)
+    {
+        return await _unitOfWork.Teachers.GetFirstOrDefaultAsync(
+            t => t.User != null && t.User.Email == email,
+            include: q => q.Include(t => t.User)
+        );
+    }
+
 }

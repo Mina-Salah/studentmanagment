@@ -200,9 +200,6 @@ namespace StudentManagement.Data.Migrations
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("TeacherId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -211,9 +208,22 @@ namespace StudentManagement.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("StudentManagement.Core.Entities.Course_file.CourseTeacher", b =>
+                {
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CourseId", "TeacherId");
+
                     b.HasIndex("TeacherId");
 
-                    b.ToTable("Courses");
+                    b.ToTable("CourseTeachers");
                 });
 
             modelBuilder.Entity("StudentManagement.Core.Entities.Course_file.CourseVideo", b =>
@@ -886,12 +896,24 @@ namespace StudentManagement.Data.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("Teacher", "Teacher")
-                        .WithMany("Courses")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("StudentManagement.Core.Entities.Course_file.CourseTeacher", b =>
+                {
+                    b.HasOne("StudentManagement.Core.Entities.Course_file.Course", "Course")
+                        .WithMany("CourseTeachers")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Teacher", "Teacher")
+                        .WithMany("CourseTeachers")
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("Teacher");
                 });
@@ -1177,6 +1199,8 @@ namespace StudentManagement.Data.Migrations
 
             modelBuilder.Entity("StudentManagement.Core.Entities.Course_file.Course", b =>
                 {
+                    b.Navigation("CourseTeachers");
+
                     b.Navigation("Enrollments");
 
                     b.Navigation("Exams");
@@ -1231,9 +1255,9 @@ namespace StudentManagement.Data.Migrations
 
             modelBuilder.Entity("Teacher", b =>
                 {
-                    b.Navigation("CourseVideos");
+                    b.Navigation("CourseTeachers");
 
-                    b.Navigation("Courses");
+                    b.Navigation("CourseVideos");
                 });
 #pragma warning restore 612, 618
         }

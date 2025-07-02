@@ -14,8 +14,9 @@ public class Teacher
     public int? UserId { get; set; }
     public User? User { get; set; }
 
-    public ICollection<Course>? Courses { get; set; }
+    //public ICollection<Course>? Courses { get; set; }
     public ICollection<CourseVideo> CourseVideos { get; set; }
+    public ICollection<CourseTeacher> CourseTeachers { get; set; } = new List<CourseTeacher>();
 
     public bool IsDeleted { get; set; } = false;
 }

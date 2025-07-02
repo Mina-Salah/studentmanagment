@@ -1,9 +1,4 @@
 ﻿using StudentManagement.Core.Entities.Course_file;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StudentManagement.Services.Interfaces
 {
@@ -14,7 +9,9 @@ namespace StudentManagement.Services.Interfaces
         Task AddCourseAsync(Course course);
         Task UpdateCourseAsync(Course course);
         Task DeleteCourseAsync(int id);
-        Task<List<Course>> GetCoursesByTeacherEmailAsync(string email);
 
+        // ✅ كورسات المدرس
+        Task<List<Course>> GetCoursesByTeacherEmailAsync(string email);
+        Task<List<Course>> GetCoursesByTeacherIdAsync(int teacherId); // أضف هذا إن لم يكن موجودًا
     }
 }

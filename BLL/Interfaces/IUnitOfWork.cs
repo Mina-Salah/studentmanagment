@@ -15,7 +15,9 @@ namespace StudentManagement.Core.Interfaces
         IGenericRepository<Category> Categories { get; }
         IGenericRepository<Teacher> Teachers { get; }
         IGenericRepository<CourseVideo> CourseVideos { get; } 
-        IGenericRepository<VideoAccess> VideoAccesses { get; } 
+        IGenericRepository<VideoAccess> VideoAccesses { get; }
+        IGenericRepository<CourseTeacher> CourseTeachers { get; }
+
         Task<int> CompleteAsync(); // Equivalent to SaveChangesAsync
     }
 }

@@ -22,8 +22,8 @@ namespace StudentManagement.Web.ViewModels
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
 
-        [Required(ErrorMessage = "كلمة المرور مطلوبة")]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
+      /*  [Required(ErrorMessage = "كلمة المرور مطلوبة")]
+        [DataType(DataType.Password)]*/
+        public string? Password { get; set; }
     }
 }

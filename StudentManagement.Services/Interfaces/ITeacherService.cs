@@ -11,6 +11,8 @@ namespace StudentManagement.Services.Interfaces
         Task DeleteTeacherAsync(int id);
         Task<IEnumerable<Teacher>> GetDeletedTeachersAsync();
         Task RestoreTeacherAsync(int id);
+        Task<Teacher?> GetTeacherByEmailAsync(string email);
+
         Task DeleteTeacherPermanentlyAsync(int id);
     }
 }

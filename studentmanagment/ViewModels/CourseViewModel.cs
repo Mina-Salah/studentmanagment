@@ -20,15 +20,20 @@ namespace StudentManagement.Web.ViewModels
         [Required(ErrorMessage = "تاريخ النهاية مطلوب")]
         public DateTime EndDate { get; set; }
 
-        [Required(ErrorMessage = "اختر المدرس")]
-        public int? TeacherId { get; set; }
+       // [Required(ErrorMessage = "اختر المدرس")]
+        //public int? TeacherId { get; set; }
 
         [Required(ErrorMessage = "اختر التصنيف")]
         public int? CategoryId { get; set; }
 
+
+        [Required(ErrorMessage = "اختر المدرسين")]
+        public List<int> TeacherIds { get; set; } = new();
         // للعرض فقط
         public string? TeacherName { get; set; }
         public string? CategoryName { get; set; }
+        public List<int> SelectedTeacherIds { get; set; } = new(); // ⬅️ جديدة
+        public string? TeacherNames { get; set; }
 
         public IEnumerable<Teacher> Teachers { get; set; } = new List<Teacher>();
         public IEnumerable<Category> Categories { get; set; } = new List<Category>();

@@ -1,10 +1,10 @@
-@model StudentManagement.Web.ViewModels.CourseViewModel
+﻿@model StudentManagement.Web.ViewModels.CourseViewModel
 
 @{
-    ViewBag.Title = "Edit Course";
+    ViewData["Title"] = "تعديل الكورس";
 }
 
-<h2>Edit Course</h2>
+<h2 class="mb-4">✏️ تعديل بيانات الكورس</h2>
 
 <form asp-action="Edit" method="post">
     <input type="hidden" asp-for="Id" />
@@ -33,26 +33,40 @@
         <span asp-validation-for="EndDate" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
-        <label asp-for="TeacherId" class="form-label">Teacher</label>
-        <select asp-for="TeacherId" class="form-control"
-                asp-items="@(new SelectList(Model.Teachers, "Id", "Name", Model.TeacherId))">
-            <option value="">-- Select Teacher --</option>
-        </select>
-        <span asp-validation-for="TeacherId" class="text-danger"></span>
+    <div class="form-group mb-4">
+        <label class="form-label">اختر المدرسين</label>
+        <div class="row">
+            @foreach (var teacher in Model.Teachers)
+            {
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="SelectedTeacherIds"
+                               value="@teacher.Id"
+                               id="teacher_@teacher.Id"
+                        @(Model.SelectedTeacherIds.Contains(teacher.Id) ? "checked" : "") />
+                        <label class="form-check-label" for="teacher_@teacher.Id">
+                            @teacher.Name
+                        </label>
+                    </div>
+                </div>
+            }
+        </div>
+        <span asp-validation-for="SelectedTeacherIds" class="text-danger"></span>
     </div>
 
     <div class="form-group mb-4">
-        <label asp-for="CategoryId" class="form-label">Category</label>
+        <label asp-for="CategoryId" class="form-label">التصنيف</label>
         <select asp-for="CategoryId" class="form-control"
-                asp-items="@(new SelectList(Model.Categories, "Id", "Name", Model.CategoryId))">
-            <option value="">-- Select Category --</option>
+                asp-items="@(new SelectList(Model.Categories, "Id", "Name"))">
+            <option value="">-- اختر التصنيف --</option>
         </select>
         <span asp-validation-for="CategoryId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Update</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-success">💾 حفظ التعديلات</button>
+    <a asp-action="Index" class="btn btn-secondary">🔙 العودة</a>
 </form>
 
 @section Scripts {

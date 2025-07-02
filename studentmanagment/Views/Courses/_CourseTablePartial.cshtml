@@ -1,43 +1,46 @@
 ﻿@model IEnumerable<StudentManagement.Web.ViewModels.CourseViewModel>
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
         <tr>
-            <th><i class="bi bi-book"></i> Title</th>
-            <th><i class="bi bi-card-text"></i> Description</th>
-            <th><i class="bi bi-calendar-plus"></i> Start Date</th>
-            <th><i class="bi bi-calendar-minus"></i> End Date</th>
-            <th><i class="bi bi-person"></i> Teacher</th>
-            <th><i class="bi bi-tags"></i> Category</th>
-            <th class="text-center"><i class="bi bi-gear-fill"></i> Actions</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Category</th>
+            <th>Teachers</th>
+            <th style="width: 150px;">Actions</th>
         </tr>
     </thead>
     <tbody>
         @if (!Model.Any())
         {
             <tr>
-                <td colspan="7" class="text-center text-muted">No courses found.</td>
+                <td colspan="7" class="text-center text-muted">
+                    <i class="bi bi-exclamation-circle"></i> No courses found.
+                </td>
             </tr>
         }
         else
         {
-            @foreach (var course in Model)
+            foreach (var course in Model)
             {
                 <tr>
                     <td>@course.Title</td>
                     <td>@course.Description</td>
                     <td>@course.StartDate.ToShortDateString()</td>
                     <td>@course.EndDate.ToShortDateString()</td>
-                    <td>@course.TeacherName</td>
                     <td>@course.CategoryName</td>
-                    <td class="text-center">
-                        <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-warning me-1">
-                            <i class="bi bi-pencil-square"></i> Edit
+                    <td>@course.TeacherNames</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-primary">
+                            <i class="bi bi-pencil-square"></i>
                         </a>
-                        <form asp-action="Delete" asp-route-id="@course.Id" method="post" class="d-inline"
+                        <form asp-action="Delete" asp-route-id="@course.Id"
+                              method="post" class="d-inline"
                               onsubmit="return confirm('Are you sure you want to delete this course?');">
                             <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> Delete
+                                <i class="bi bi-trash"></i>
                             </button>
                         </form>
                     </td>

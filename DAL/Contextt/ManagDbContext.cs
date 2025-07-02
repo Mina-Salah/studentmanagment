@@ -13,14 +13,12 @@ public class ManagDbContext : DbContext
     public DbSet<Course> Courses { get; set; }
     public DbSet<CourseVideo> CourseVideos { get; set; }
     public DbSet<VideoAccess> VideoAccesses { get; set; }
-
     public DbSet<StudentSubject> StudentSubjects { get; set; }
     public DbSet<Lesson> Lessons { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<Quiz> Quizzes { get; set; }
     public DbSet<StudentQuiz> StudentQuizzes { get; set; }
     public DbSet<Notification> Notifications { get; set; }
-
     public DbSet<ActivityLog> ActivityLogs { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
     public DbSet<Certificate> Certificates { get; set; }
@@ -31,12 +29,11 @@ public class ManagDbContext : DbContext
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<FileResource> FileResources { get; set; }
     public DbSet<Submission> Submissions { get; set; }
-
-    // Newly added entities
     public DbSet<Answer> Answers { get; set; }
     public DbSet<Attachment> Attachments { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Teacher> Teachers { get; set; }
+    public DbSet<CourseTeacher> CourseTeachers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,8 +77,6 @@ public class ManagDbContext : DbContext
             .WithMany(q => q.StudentQuizzes)
             .HasForeignKey(sq => sq.QuizId);
 
-        // ✅ ✅ ✅ هذه العلاقات هي الأهم 👇
-
         // علاقة 1-1: الطالب يملك مستخدم
         modelBuilder.Entity<Student>()
             .HasOne(s => s.User)
@@ -110,12 +105,19 @@ public class ManagDbContext : DbContext
             .HasForeignKey(a => a.QuestionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // === Course - Teacher Relation ===
-        modelBuilder.Entity<Course>()
-            .HasOne(c => c.Teacher)
-            .WithMany(t => t.Courses)
-            .HasForeignKey(c => c.TeacherId)
-            .OnDelete(DeleteBehavior.SetNull);
+        // === CourseTeacher (Many-to-Many between Course and Teacher) ===
+        modelBuilder.Entity<CourseTeacher>()
+            .HasKey(ct => new { ct.CourseId, ct.TeacherId }); // ✅ المفتاح الأساسي المركب
+
+        modelBuilder.Entity<CourseTeacher>()
+            .HasOne(ct => ct.Course)
+            .WithMany(c => c.CourseTeachers)
+            .HasForeignKey(ct => ct.CourseId);
+
+        modelBuilder.Entity<CourseTeacher>()
+            .HasOne(ct => ct.Teacher)
+            .WithMany(t => t.CourseTeachers)
+            .HasForeignKey(ct => ct.TeacherId);
 
         // === Course - Category Relation ===
         modelBuilder.Entity<Course>()
@@ -135,13 +137,11 @@ public class ManagDbContext : DbContext
             .HasOne(va => va.Student)
             .WithMany()
             .HasForeignKey(va => va.StudentId);
-        // teacher and course video
+
         modelBuilder.Entity<CourseVideo>()
-        .HasOne(cv => cv.Teacher)
-        .WithMany(t => t.CourseVideos)
-        .HasForeignKey(cv => cv.TeacherId)
-        .OnDelete(DeleteBehavior.Restrict); // أو حسب ما يناسبك
-
-
+            .HasOne(cv => cv.Teacher)
+            .WithMany(t => t.CourseVideos)
+            .HasForeignKey(cv => cv.TeacherId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
