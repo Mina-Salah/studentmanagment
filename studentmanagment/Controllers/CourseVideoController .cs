@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using StudentManagement.Core.Entities.Course_file;
 using StudentManagement.Services.Interfaces;
 using StudentManagement.Web.ViewModels;
@@ -30,9 +31,19 @@ namespace StudentManagement.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Upload()
         {
-            var allCourses = await _courseService.GetAllCoursesAsync();
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var teacher = await _teacherService.GetTeacherByEmailAsync(email);
 
-            ViewBag.Courses = allCourses.Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            if (teacher == null)
+            {
+                TempData["Error"] = "لم يتم العثور على المدرس.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // ✅ الكورسات اللي المدرس متعين فيها فقط
+            var teacherCourses = await _courseService.GetCoursesByTeacherIdAsync(teacher.Id);
+
+            ViewBag.Courses = teacherCourses.Select(c => new SelectListItem
             {
                 Value = c.Id.ToString(),
                 Text = c.Title
@@ -40,6 +51,7 @@ namespace StudentManagement.Web.Controllers
 
             return View(new UploadVideoViewModel());
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Upload(UploadVideoViewModel model)
@@ -53,8 +65,9 @@ namespace StudentManagement.Web.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var allCourses = await _courseService.GetAllCoursesAsync();
-            ViewBag.Courses = allCourses.Select(c => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
+            // ✅ عرض الكورسات المسموح بها للمدرس فقط
+            var teacherCourses = await _courseService.GetCoursesByTeacherIdAsync(teacher.Id);
+            ViewBag.Courses = teacherCourses.Select(c => new SelectListItem
             {
                 Value = c.Id.ToString(),
                 Text = c.Title
@@ -63,12 +76,22 @@ namespace StudentManagement.Web.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var courseFolder = Path.Combine(_env.WebRootPath, "videos", $"Course_{model.CourseId}");
-            if (!Directory.Exists(courseFolder))
-                Directory.CreateDirectory(courseFolder);
+            // ✅ تأكد إن المدرس له صلاحية على هذا الكورس
+            if (!teacherCourses.Any(c => c.Id == model.CourseId))
+            {
+                TempData["Error"] = "لا يمكنك رفع فيديو لهذا الكورس.";
+                return View(model);
+            }
+
+            // باقي منطق الحفظ زي ما هو...
+            var course = teacherCourses.First(c => c.Id == model.CourseId);
+            var courseFolderName = course.Title.Replace(" ", "_");
+            var uploadsDir = Path.Combine(_env.WebRootPath, "videos", courseFolderName);
+            if (!Directory.Exists(uploadsDir))
+                Directory.CreateDirectory(uploadsDir);
 
             var fileName = Guid.NewGuid() + Path.GetExtension(model.VideoFile.FileName);
-            var filePath = Path.Combine(courseFolder, fileName);
+            var filePath = Path.Combine(uploadsDir, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
@@ -78,8 +101,8 @@ namespace StudentManagement.Web.Controllers
             var video = new CourseVideo
             {
                 Title = model.Title,
-                VideoPath = $"/videos/Course_{model.CourseId}/{fileName}",
-                CourseId = model.CourseId,
+                VideoPath = $"/videos/{courseFolderName}/{fileName}",
+                CourseId = course.Id,
                 TeacherId = teacher.Id,
                 TeacherEmail = email
             };
@@ -95,7 +118,15 @@ namespace StudentManagement.Web.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var videos = await _videoService.GetVideosByTeacherEmailAsync(email);
-            return View(videos);
+
+            // ✅ تجميع الفيديوهات حسب الكورس
+            var groupedVideos = videos
+                .Where(v => v.Course != null) // تأكد أن الكورس غير null
+                .GroupBy(v => v.Course)
+                .ToList();
+
+            return View(groupedVideos);
         }
+
     }
 }

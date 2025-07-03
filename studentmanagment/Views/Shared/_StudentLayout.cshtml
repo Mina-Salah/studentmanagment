@@ -516,8 +516,8 @@
                 </a>
             </li>
             <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Assignments" ? "active" : "")">
-                <a class="sidebar-link" asp-controller="Student" asp-action="Assignments">
-                    <i class="fas fa-tasks"></i> Assignments
+                <a class="sidebar-link" asp-controller="StudentDashboard" asp-action="AllCourses">
+                    <i class="fas fa-tasks"></i> All Courses
                     <span class="sidebar-badge">3</span>
                 </a>
             </li>

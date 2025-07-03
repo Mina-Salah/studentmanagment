@@ -1,50 +1,136 @@
 ﻿@model IEnumerable<StudentManagement.Web.ViewModels.CourseViewModel>
 
-<table class="table table-bordered table-hover">
-    <thead class="table-light">
+<style>
+    /* تأثير تلاشي ودخول الصفوف تدريجياً عند تحميل الصفحة */
+    tbody tr {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeSlideIn 0.5s forwards;
+    }
+        /* تأخير بسيط لكل صف لجعل الانيميشن متسلسل */
+        tbody tr:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        tbody tr:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        tbody tr:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        tbody tr:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        tbody tr:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        tbody tr:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+    /* ... تكمل حسب عدد الصفوف */
+
+    @@keyframes fadeSlideIn {
+        to
+
+    {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* تأثير رفع الصف عند المرور */
+    tbody tr:hover {
+        background-color: #e6f0ff;
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    /* التأكد من العودة للوضع الطبيعي بعد انتهاء المرور */
+    tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    /* باقي التنسيقات من المثال السابق */
+    th, td {
+        vertical-align: middle !important;
+    }
+
+        th:nth-child(3), th:nth-child(4) {
+            width: 110px;
+            text-align: center;
+        }
+
+        th:nth-child(6) {
+            min-width: 180px;
+        }
+
+    .btn-lg {
+        min-width: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn i {
+        vertical-align: middle;
+    }
+</style>
+
+<table class="table table-striped table-hover table-bordered align-middle">
+    <thead class="table-primary text-center">
         <tr>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Category</th>
-            <th>Teachers</th>
-            <th style="width: 150px;">Actions</th>
+            <th>العنوان</th>
+            <th>الوصف</th>
+            <th>تاريخ البداية</th>
+            <th>تاريخ النهاية</th>
+            <th>التصنيف</th>
+            <th>المدرسين</th>
+            <th style="width: 230px;">العمليات</th>
         </tr>
     </thead>
     <tbody>
         @if (!Model.Any())
         {
             <tr>
-                <td colspan="7" class="text-center text-muted">
-                    <i class="bi bi-exclamation-circle"></i> No courses found.
+                <td colspan="7" class="text-center text-muted py-4">
+                    <i class="bi bi-exclamation-circle fs-3"></i> لا توجد دورات
                 </td>
             </tr>
         }
         else
         {
+            var index = 0;
             foreach (var course in Model)
             {
-                <tr>
+                <tr style="animation-delay:@($"{0.1 * index}s")">
                     <td>@course.Title</td>
-                    <td>@course.Description</td>
-                    <td>@course.StartDate.ToShortDateString()</td>
-                    <td>@course.EndDate.ToShortDateString()</td>
+                    <td>@(course.Description?.Length > 60 ? course.Description.Substring(0, 60) + "..." : course.Description)</td>
+                    <td class="text-center">@course.StartDate.ToShortDateString()</td>
+                    <td class="text-center">@course.EndDate.ToShortDateString()</td>
                     <td>@course.CategoryName</td>
                     <td>@course.TeacherNames</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@course.Id" class="btn btn-sm btn-primary">
-                            <i class="bi bi-pencil-square"></i>
+                    <td class="d-flex justify-content-center gap-2">
+                        <a asp-action="Edit" asp-route-id="@course.Id"
+                           class="btn btn-warning mb-4 text-white" title="تعديل">
+                            <i class="bi bi-pencil-square fs-5"></i> تعديل
                         </a>
                         <form asp-action="Delete" asp-route-id="@course.Id"
-                              method="post" class="d-inline"
-                              onsubmit="return confirm('Are you sure you want to delete this course?');">
-                            <button type="submit" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i>
+                              method="post" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
+                            <button type="submit" class="btn btn-danger mb-4" title="حذف">
+                                <i class="bi bi-trash fs-5"></i> حذف
                             </button>
                         </form>
                     </td>
                 </tr>
+                index++;
             }
         }
     </tbody>
