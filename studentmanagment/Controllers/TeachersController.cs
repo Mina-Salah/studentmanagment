@@ -88,11 +88,8 @@ namespace StudentManagement.Web.Controllers
 
             var viewModel = _mapper.Map<TeacherViewModel>(teacher);
 
-            var user = (await _unitOfWork.Users.GetAllAsync())
-                .FirstOrDefault(u => u.FullName == teacher.Name&& u.Role == "Teacher");
-
-            if (user != null)
-                viewModel.Email = user.Email;
+            if (teacher.User != null)
+                viewModel.Email = teacher.User.Email;
 
             return View(viewModel);
         }
@@ -104,10 +101,12 @@ namespace StudentManagement.Web.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var teacher = _mapper.Map<Teacher>(model);
-            var user = (await _unitOfWork.Users.GetAllAsync())
-                .FirstOrDefault(u => u.FullName == model.Name && u.Role == "Teacher");
+            var existingTeacher = await _teacherService.GetTeacherByIdAsync(model.Id);
+            if (existingTeacher == null) return NotFound();
 
+            var user = existingTeacher.User;
+
+            // التحقق من تكرار الإيميل فقط لو تم تغييره
             if (user != null && user.Email.ToLower() != model.Email.ToLower() &&
                 await _userService.IsEmailTakenAsync(model.Email))
             {
@@ -115,8 +114,14 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
             }
 
-            await _teacherService.UpdateTeacherAsync(model.Id, teacher);
+            // تحديث بيانات المدرس
+            existingTeacher.Name = model.Name;
+            existingTeacher.Address = model.Address;
+            existingTeacher.DateOfBirth = model.DateOfBirth;
 
+            await _teacherService.UpdateTeacherAsync(model.Id, existingTeacher);
+
+            // تحديث بيانات المستخدم المرتبط
             if (user != null)
             {
                 user.Email = model.Email;
@@ -128,6 +133,7 @@ namespace StudentManagement.Web.Controllers
             TempData["SuccessMessage"] = "تم تحديث بيانات المدرس بنجاح.";
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

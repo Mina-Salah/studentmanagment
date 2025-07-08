@@ -14,13 +14,21 @@ namespace StudentManagement.Core.Mapping
     {
         public MappingProfile()
         {
-            // Student
+            // ✅ Student → StudentFormViewModel
             CreateMap<Student, StudentFormViewModel>()
-        .ForMember(dest => dest.Subjects, opt => opt.Ignore())
-        .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email)); // ✅ هذا السطر مهم
+                .ForMember(dest => dest.Subjects, opt => opt.Ignore())
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User != null ? src.User.Email : string.Empty))
+                .ForMember(dest => dest.Password, opt => opt.Ignore());
 
-            CreateMap<Student, StudentFormViewModel>()
-                .ForMember(dest => dest.Subjects, opt => opt.Ignore());
+            // ✅ StudentFormViewModel → Student
+            CreateMap<StudentFormViewModel, Student>()
+                .ForMember(dest => dest.StudentSubjects, opt => opt.MapFrom(src =>
+                    src.Subjects != null
+                        ? src.Subjects.Where(s => s.IsSelected).Select(s => new StudentSubject { SubjectId = s.Id })
+                        : new List<StudentSubject>()))
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
             // Subject
             CreateMap<Subject, SubjectCheckboxItem>()

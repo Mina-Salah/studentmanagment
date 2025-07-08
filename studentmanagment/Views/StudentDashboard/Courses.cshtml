@@ -1,0 +1,157 @@
+﻿@model List<IGrouping<StudentManagement.Core.Entities.Course_file.Course, StudentManagement.Core.Entities.Course_file.CourseVideo>>
+
+@{
+    ViewData["Title"] = "كورساتي";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+}
+
+<!-- 💡 Hero Section -->
+<div class="dashboard-header bg-gradient-primary-to-secondary py-5 text-center text-white">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-3">كورساتي التعليمية</h1>
+        <p class="lead opacity-75">كل المساقات التي سجلت فيها وجاهزة للتعلم</p>
+    </div>
+</div>
+
+<!-- 📚 Main Content -->
+<div class="container py-5">
+    @if (!Model.Any())
+    {
+        <div class="empty-state text-center py-5">
+            <div class="empty-state-icon mb-3">
+                <i class="fas fa-book-open fa-3x text-muted"></i>
+            </div>
+            <h4 class="text-muted mb-2">لا يوجد كورسات مسجلة بعد</h4>
+            <p class="text-muted mb-4">يمكنك تصفح الكورسات المتاحة والتسجيل فيها لبدء رحلة التعلم</p>
+            <a href="#" class="btn btn-primary px-4">
+                <i class="fas fa-search me-2"></i> تصفح الكورسات
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- 🎯 Stats Summary -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100 text-center p-4">
+                    <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
+                    <h4 class="fw-bold text-primary">@Model.Count</h4>
+                    <p class="text-muted mb-0">عدد الكورسات المسجلة</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100 text-center p-4">
+                    <i class="fas fa-video fa-2x text-info mb-2"></i>
+                    <h4 class="fw-bold text-info">@Model.Sum(g => g.Count())</h4>
+                    <p class="text-muted mb-0">إجمالي الفيديوهات</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow-sm border-0 h-100 text-center p-4">
+                    <i class="fas fa-clock fa-2x text-success mb-2"></i>
+                    <h4 class="fw-bold text-success">
+                        @((Model.Sum(g => g.Sum(v => v.DurationInMinutes)) / 60.0).ToString("F1")) ساعة
+                    </h4>
+                    <p class="text-muted mb-0">إجمالي مدة التعلم</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🔥 Course List -->
+        <h3 class="mb-4 text-primary">
+            <i class="fas fa-book-open me-2"></i> الكورسات المسجلة
+        </h3>
+
+        <div class="row g-4">
+            @foreach (var group in Model)
+            {
+                <div class="col-lg-6">
+                    <div class="card course-card h-100 border-0 shadow-sm transition-all">
+                        <div class="card-img-top bg-light" style="height: 180px; background: url('https://source.unsplash.com/random/600x400/?education,@group.Key.Title.Replace(" ", "")') center/cover; background-size: cover;"></div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title text-primary mb-0">@group.Key.Title</h5>
+                                <span class="badge bg-primary rounded-pill">@group.Count() فيديو</span>
+                            </div>
+
+                            <p class="text-muted small mb-3">@group.Key.Description</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">
+                                    <i class="fas fa-clock me-1"></i>
+                                    @(group.Sum(v => v.DurationInMinutes)) دقيقة
+                                </span>
+
+                                <a asp-action="CourseVideos" asp-route-courseId="@group.Key.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-play-circle me-1"></i> ابدأ التعلم
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        body {
+            text-align: right;
+            direction: rtl;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .course-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+            .course-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.08) !important;
+            }
+
+        .empty-state {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .empty-state-icon {
+            opacity: 0.5;
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-header {
+                padding: 2rem 0;
+            }
+
+            .card-img-top {
+                height: 140px !important;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        // Animate course cards
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.course-card');
+            cards.forEach((card, i) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = `all 0.5s ease ${(i + 1) * 0.1}s`;
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            });
+        });
+    </script>
+}

@@ -25,6 +25,7 @@ builder.Services.AddScoped<IStudentSubjectService, StudentSubjectService>();
 builder.Services.AddScoped<ICourseVideoService, CourseVideoService>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.Configure<FormOptions>(options =>
 {

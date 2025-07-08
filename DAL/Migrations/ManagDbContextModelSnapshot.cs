@@ -137,6 +137,9 @@ namespace StudentManagement.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -237,6 +240,9 @@ namespace StudentManagement.Data.Migrations
                     b.Property<int?>("CourseId")
                         .HasColumnType("int");
 
+                    b.Property<int>("DurationInMinutes")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -277,6 +283,9 @@ namespace StudentManagement.Data.Migrations
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("WatchedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -331,7 +340,13 @@ namespace StudentManagement.Data.Migrations
                     b.Property<DateTime>("EnrolledAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -339,6 +354,8 @@ namespace StudentManagement.Data.Migrations
                     b.HasIndex("CourseId");
 
                     b.HasIndex("StudentId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Enrollments");
                 });
@@ -980,11 +997,15 @@ namespace StudentManagement.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("StudentManagement.Core.Entities.User", "Student")
-                        .WithMany("Enrollments")
+                    b.HasOne("StudentManagement.Core.Entities.Student", "Student")
+                        .WithMany()
                         .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("StudentManagement.Core.Entities.User", null)
+                        .WithMany("Enrollments")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Course");
 

@@ -12,5 +12,8 @@ namespace StudentManagement.Services.Interfaces
         Task AddVideoAsync(CourseVideo video);
 
         Task UploadVideoAsync(UploadVideoViewModel model, string teacherEmail, string webRootPath);
+        Task<IEnumerable<CourseVideo>> GetAllVideosWithCourseAsync();
+        Task<List<CourseVideo>> GetVideosByCourseIdAsync(int courseId);
+
     }
 }

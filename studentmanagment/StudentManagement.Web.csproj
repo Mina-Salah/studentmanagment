@@ -14,10 +14,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<PackageReference Include="MediaToolkit" Version="1.1.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.15">
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+		<PackageReference Include="Xabe.FFmpeg" Version="6.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

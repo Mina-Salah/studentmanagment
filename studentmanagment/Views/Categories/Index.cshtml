@@ -8,11 +8,12 @@
 
 <a asp-action="Create" class="btn btn-primary mb-3">+ Add New Category</a>
 
-<table class="table table-bordered">
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th>Id</th>
+            <th>#</th>
             <th>Name</th>
+            <th>Is Deleted</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -20,7 +21,7 @@
         @if (!Model.Any())
         {
             <tr>
-                <td colspan="3" class="text-center">No categories available.</td>
+                <td colspan="4" class="text-center">No categories available.</td>
             </tr>
         }
         else
@@ -32,10 +33,32 @@
                     <td>@i</td>
                     <td>@item.Name</td>
                     <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
-                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this category?');">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
+                        @if (item.IsDeleted)
+                        {
+                            <span class="badge bg-danger">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">No</span>
+                        }
+                    </td>
+                    <td>
+                        @if (!item.IsDeleted)
+                        {
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to soft delete this category?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Soft Delete</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="Restore" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">Restore</button>
+                            </form>
+                            <form asp-action="PermanentDelete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('This will permanently delete the category. Are you sure?');">
+                                <button type="submit" class="btn btn-sm btn-dark">Delete Forever</button>
+                            </form>
+                        }
                     </td>
                 </tr>
                 i++;

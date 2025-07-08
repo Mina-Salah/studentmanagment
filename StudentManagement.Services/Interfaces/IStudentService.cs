@@ -21,5 +21,6 @@ namespace StudentManagement.Services.Interfaces
 
         Task DeleteStudentPermanentlyAsync(int id);
         Task<Student?> GetStudentByEmailAsync(string email);
+   
     }
 }

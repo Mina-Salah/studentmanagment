@@ -506,21 +506,24 @@
                 </a>
             </li>
             <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Courses" ? "active" : "")">
-                <a class="sidebar-link" asp-controller="Student" asp-action="Courses">
+                <a class="sidebar-link" asp-controller="StudentDashboard" asp-action="Courses">
                     <i class="fas fa-book-open"></i> My Courses
                 </a>
             </li>
-            <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Videos" ? "active" : "")">
-                <a class="sidebar-link" asp-controller="Student" asp-action="Videos">
-                    <i class="fas fa-play-circle"></i> Video Library
-                </a>
-            </li>
-            <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Assignments" ? "active" : "")">
+
+            <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "AllCourses" ? "active" : "")">
                 <a class="sidebar-link" asp-controller="StudentDashboard" asp-action="AllCourses">
                     <i class="fas fa-tasks"></i> All Courses
-                    <span class="sidebar-badge">3</span>
+                    <span class="sidebar-badge">@ViewBag.CourseCount</span>
                 </a>
             </li>
+            <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Videos" ? "active" : "")">
+                <a class="sidebar-link" asp-controller="StudentDashboard" asp-action="MyExam">
+                    <i class="fas fa-play-circle"></i> My Exam
+                </a>
+            </li>
+
+
             <li class="sidebar-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Grades" ? "active" : "")">
                 <a class="sidebar-link" asp-controller="Student" asp-action="Grades">
                     <i class="fas fa-chart-line"></i> Grades

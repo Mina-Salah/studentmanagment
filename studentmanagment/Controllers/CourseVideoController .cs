@@ -5,6 +5,8 @@ using StudentManagement.Core.Entities.Course_file;
 using StudentManagement.Services.Interfaces;
 using StudentManagement.Web.ViewModels;
 using System.Security.Claims;
+using MediaToolkit;
+using MediaToolkit.Model;
 
 namespace StudentManagement.Web.Controllers
 {
@@ -40,7 +42,6 @@ namespace StudentManagement.Web.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            // ✅ الكورسات اللي المدرس متعين فيها فقط
             var teacherCourses = await _courseService.GetCoursesByTeacherIdAsync(teacher.Id);
 
             ViewBag.Courses = teacherCourses.Select(c => new SelectListItem
@@ -51,7 +52,6 @@ namespace StudentManagement.Web.Controllers
 
             return View(new UploadVideoViewModel());
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Upload(UploadVideoViewModel model)
@@ -65,7 +65,6 @@ namespace StudentManagement.Web.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            // ✅ عرض الكورسات المسموح بها للمدرس فقط
             var teacherCourses = await _courseService.GetCoursesByTeacherIdAsync(teacher.Id);
             ViewBag.Courses = teacherCourses.Select(c => new SelectListItem
             {
@@ -76,14 +75,12 @@ namespace StudentManagement.Web.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            // ✅ تأكد إن المدرس له صلاحية على هذا الكورس
             if (!teacherCourses.Any(c => c.Id == model.CourseId))
             {
                 TempData["Error"] = "لا يمكنك رفع فيديو لهذا الكورس.";
                 return View(model);
             }
 
-            // باقي منطق الحفظ زي ما هو...
             var course = teacherCourses.First(c => c.Id == model.CourseId);
             var courseFolderName = course.Title.Replace(" ", "_");
             var uploadsDir = Path.Combine(_env.WebRootPath, "videos", courseFolderName);
@@ -98,18 +95,29 @@ namespace StudentManagement.Web.Controllers
                 await model.VideoFile.CopyToAsync(stream);
             }
 
+            // ✅ حساب مدة الفيديو باستخدام MediaToolkit
+            var inputFile = new MediaFile { Filename = filePath };
+            int durationInMinutes = 0;
+            using (var engine = new Engine())
+            {
+                engine.GetMetadata(inputFile);
+                var duration = inputFile.Metadata?.Duration ?? TimeSpan.Zero;
+                durationInMinutes = (int)Math.Ceiling(duration.TotalMinutes);
+            }
+
             var video = new CourseVideo
             {
                 Title = model.Title,
                 VideoPath = $"/videos/{courseFolderName}/{fileName}",
                 CourseId = course.Id,
                 TeacherId = teacher.Id,
-                TeacherEmail = email
+                TeacherEmail = email,
+                DurationInMinutes = durationInMinutes
             };
 
             await _videoService.AddVideoAsync(video);
 
-            TempData["Success"] = "تم رفع الفيديو بنجاح.";
+            TempData["Success"] = "تم رفع الفيديو وحساب المدة بنجاح.";
             return RedirectToAction("MyVideos");
         }
 
@@ -119,14 +127,12 @@ namespace StudentManagement.Web.Controllers
             var email = User.FindFirstValue(ClaimTypes.Email);
             var videos = await _videoService.GetVideosByTeacherEmailAsync(email);
 
-            // ✅ تجميع الفيديوهات حسب الكورس
             var groupedVideos = videos
-                .Where(v => v.Course != null) // تأكد أن الكورس غير null
+                .Where(v => v.Course != null)
                 .GroupBy(v => v.Course)
                 .ToList();
 
             return View(groupedVideos);
         }
-
     }
 }

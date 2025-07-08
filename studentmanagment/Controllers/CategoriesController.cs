@@ -23,6 +23,7 @@ namespace StudentManagement.Web.Controllers
             return View(categories);
         }
 
+
         // GET: /Categories/Create
         public IActionResult Create()
         {
@@ -85,5 +86,25 @@ namespace StudentManagement.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
+        {
+            await _categoryService.RestoreCategoryAsync(id);
+            TempData["SuccessMessage"] = "Category restored successfully";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PermanentDelete(int id)
+        {
+            await _categoryService.PermanentDeleteCategoryAsync(id);
+            TempData["SuccessMessage"] = "Category permanently deleted successfully";
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

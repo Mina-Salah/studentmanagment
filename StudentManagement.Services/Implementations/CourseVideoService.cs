@@ -107,5 +107,29 @@ namespace StudentManagement.Services.Implementations
             await _unitOfWork.CourseVideos.AddAsync(video);
             await _unitOfWork.CompleteAsync();
         }
+
+
+        public async Task<IEnumerable<CourseVideo>> GetAllVideosWithCourseAsync()
+        {
+            var videos = await _unitOfWork.CourseVideos.GetAllAsync(
+                include: q => q
+                    .Include(v => v.Course)
+                        .ThenInclude(c => c.CourseTeachers)
+                            .ThenInclude(ct => ct.Teacher)
+            );
+
+            return videos;
+        }
+
+        public async Task<List<CourseVideo>> GetVideosByCourseIdAsync(int courseId)
+        {
+            var videos = await _unitOfWork.CourseVideos.GetAllAsync(
+                filter: v => v.CourseId == courseId,
+                include: q => q.Include(v => v.Course)
+            );
+
+            return videos.OrderBy(v => v.Id).ToList();
+        }
+
     }
 }

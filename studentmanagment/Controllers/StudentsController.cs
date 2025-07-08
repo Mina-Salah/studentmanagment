@@ -144,7 +144,6 @@ namespace StudentManagement.Web.Controllers
             return View(viewModel);
         }
 
-        // تعديل بيانات الطالب
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(StudentFormViewModel model)
@@ -161,9 +160,21 @@ namespace StudentManagement.Web.Controllers
                 .Select(s => s.Id)
                 .ToList() ?? new();
 
-            var user = (await _unitOfWork.Users.GetAllAsync())
-                .FirstOrDefault(u => u.FullName == student.Name && u.Role == "Student");
+            // ✅ جلب الطالب الفعلي من قاعدة البيانات للتأكد من وجوده ومعرفة UserId
+            var existingStudent = await _studentService.GetStudentByIdAsync(model.Id);
+            if (existingStudent == null)
+            {
+                return NotFound();
+            }
 
+            // ✅ جلب المستخدم المرتبط باستخدام UserId وليس FullName
+            User? user = null;
+            if (existingStudent.UserId.HasValue)
+            {
+                user = await _unitOfWork.Users.GetByIdAsync(existingStudent.UserId.Value);
+            }
+
+            // ✅ التحقق من التكرار فقط إذا تم تغيير الإيميل
             if (user != null && user.Email.ToLower() != model.Email.ToLower() &&
                 await _userService.IsEmailTakenAsync(model.Email))
             {
@@ -172,11 +183,13 @@ namespace StudentManagement.Web.Controllers
                 return View(model);
             }
 
+            // ✅ تحديث بيانات الطالب
             await _studentService.UpdateStudentAsync(model.Id, student, selectedSubjectIds);
 
             if (user != null)
             {
                 user.Email = model.Email;
+                user.FullName = model.Name;
                 _unitOfWork.Users.Update(user);
                 await _unitOfWork.CompleteAsync();
             }
@@ -184,6 +197,7 @@ namespace StudentManagement.Web.Controllers
             TempData["SuccessMessage"] = "تم تحديث بيانات الطالب بنجاح.";
             return RedirectToAction(nameof(Index));
         }
+
 
         // حذف الطالب (Soft Delete)
         [HttpPost]

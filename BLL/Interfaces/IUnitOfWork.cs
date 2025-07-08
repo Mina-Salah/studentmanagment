@@ -17,6 +17,7 @@ namespace StudentManagement.Core.Interfaces
         IGenericRepository<CourseVideo> CourseVideos { get; } 
         IGenericRepository<VideoAccess> VideoAccesses { get; }
         IGenericRepository<CourseTeacher> CourseTeachers { get; }
+        IGenericRepository<Enrollment> Enrollments { get; }
 
         Task<int> CompleteAsync(); // Equivalent to SaveChangesAsync
     }

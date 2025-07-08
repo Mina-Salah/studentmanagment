@@ -23,6 +23,8 @@ namespace StudentManagement.Data.UnitOfWork
             CourseVideos = new GenericRepository<CourseVideo>(_context);
             VideoAccesses = new GenericRepository<VideoAccess>(_context);
             CourseTeachers = new GenericRepository<CourseTeacher>(_context);
+            Enrollments = new GenericRepository<Enrollment>(_context); // ✅ أضف هذا
+
         }
 
         public IGenericRepository<Student> Students { get; private set; }
@@ -35,6 +37,7 @@ namespace StudentManagement.Data.UnitOfWork
         public IGenericRepository<Category> Categories { get; private set; }
         public IGenericRepository<Teacher> Teachers { get; private set; }
         public IGenericRepository<CourseTeacher> CourseTeachers { get; private set; }
+        public IGenericRepository<Enrollment> Enrollments { get; private set; }
 
         public async Task<int> CompleteAsync()
         {

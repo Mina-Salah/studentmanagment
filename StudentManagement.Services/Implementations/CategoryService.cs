@@ -43,6 +43,30 @@ namespace StudentManagement.Services.Implementations
         public async Task DeleteCategoryAsync(int id)
         {
             await _unitOfWork.Categories.SoftDeleteAsync(id);
+            await _unitOfWork.CompleteAsync();
+
         }
+
+        public async Task PermanentDeleteCategoryAsync(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdIncludingDeletedAsync(id);
+            if (category != null)
+            {
+                _unitOfWork.Categories.Delete(category);
+                await _unitOfWork.CompleteAsync();
+            }
+        }
+
+        public async Task RestoreCategoryAsync(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdIncludingDeletedAsync(id);
+            if (category != null && category.IsDeleted)
+            {
+                category.IsDeleted = false;
+                _unitOfWork.Categories.Update(category);
+                await _unitOfWork.CompleteAsync();
+            }
+        }
+
     }
 }

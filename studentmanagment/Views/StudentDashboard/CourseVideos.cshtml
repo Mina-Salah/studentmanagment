@@ -1,0 +1,367 @@
+﻿@model StudentManagement.Web.ViewModels.VideoCourseViewModel
+@{
+    ViewData["Title"] = "مشاهدة الفيديوهات التعليمية";
+    Layout = "~/Views/Shared/_StudentLayout.cshtml";
+
+    var watched = Model.WatchedVideoIds;
+    int totalVideos = Model.Videos.Count;
+    int watchedCount = watched.Count;
+    double progress = totalVideos == 0 ? 0 : (watchedCount / (double)totalVideos) * 100;
+    var firstVideo = Model.Videos.FirstOrDefault();
+
+    // 🕒 حساب المدة الكلية
+    int totalMinutes = Model.Videos.Sum(v => v.DurationInMinutes);
+    int hours = totalMinutes / 60;
+    int minutes = totalMinutes % 60;
+}
+
+<!-- Hero Section -->
+<div class="course-header bg-gradient-primary-to-secondary py-4">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center text-white">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-play-circle me-2"></i> مشغل الفيديوهات التعليمية
+            </h1>
+            <a asp-action="Courses" asp-controller="StudentDashboard" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-arrow-right me-1"></i> العودة للكورسات
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container py-4">
+    <!-- Course Progress -->
+    <div class="course-progress mb-4">
+        <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted">تقدمك في الكورس</span>
+            <span class="fw-bold">@Math.Round(progress)%</span>
+        </div>
+        <div class="progress" style="height: 10px;">
+            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                 role="progressbar"
+                 style="width: @progress%"
+                 aria-valuenow="@progress"
+                 aria-valuemin="0"
+                 aria-valuemax="100"></div>
+        </div>
+        <div class="text-center mt-1 small text-muted">
+            @watchedCount من @totalVideos فيديو مكتمل
+        </div>
+        <div class="text-center mt-1 small text-muted">
+            🕒 المدة الكلية للكورس:
+            @if (hours > 0)
+            {
+                @($"{hours} ساعة{(minutes > 0 ? $" و{minutes} دقيقة" : "")}")
+            }
+            else
+            {
+                @($"{minutes} دقيقة")
+            }
+        </div>
+    </div>
+
+    <!-- Video Player Section -->
+    <div class="video-player-container shadow-lg rounded-3 overflow-hidden">
+        <div class="row g-0">
+            <!-- Video Player -->
+            <div class="col-lg-8">
+                <div class="video-wrapper bg-dark position-relative">
+                    <video id="mainVideo" controls class="w-100" style="height: 450px;">
+                        <source src="@firstVideo?.VideoPath" type="video/mp4" />
+                        المتصفح الخاص بك لا يدعم تشغيل الفيديو
+                    </video>
+
+                    <!-- Video Info -->
+                    <div class="video-info position-absolute bottom-0 start-0 w-100 p-3 text-white" style="background: rgba(0,0,0,0.6);">
+                        <h5 id="currentVideoTitle" class="mb-0">@firstVideo?.Title</h5>
+                    </div>
+                </div>
+
+                <!-- Video Status -->
+                <div id="videoStatus" class="p-3 bg-light border-top text-center">
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    جاري تحميل الفيديو...
+                </div>
+            </div>
+
+            <!-- Playlist -->
+            <div class="col-lg-4">
+                <div class="playlist-container h-100" style="max-height: 450px; overflow-y: auto;">
+                    <div class="playlist-header bg-primary text-white p-3">
+                        <h6 class="mb-0">
+                            <i class="fas fa-list-ol me-2"></i> قائمة التشغيل
+                        </h6>
+                    </div>
+
+                    <div class="playlist-items">
+                        @for (int i = 0; i < Model.Videos.Count; i++)
+                        {
+                            var video = Model.Videos[i];
+                            bool canPlay = i == 0 || watched.Contains(Model.Videos[i - 1].Id);
+                            bool isWatched = watched.Contains(video.Id);
+
+                            <div class="playlist-item @(i == 0 ? "active" : "") @(canPlay ? "" : "disabled")"
+                                 data-video-id="@video.Id"
+                                 data-video-src="@video.VideoPath"
+                                 data-course-id="@Model.CourseId"
+                                 data-is-watched="@isWatched.ToString().ToLower()"
+                                 data-next-id="@(i + 1 < Model.Videos.Count ? Model.Videos[i + 1].Id : 0)">
+                                <div class="d-flex align-items-center p-3 border-bottom">
+                                    <div class="video-icon me-3">
+                                        @if (isWatched)
+                                        {
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fas fa-play-circle text-muted"></i>
+                                        }
+                                    </div>
+                                    <div class="video-info flex-grow-1">
+                                        <h6 class="mb-0">@video.Title</h6>
+                                        <small class="text-muted">⏱️ @video.DurationInMinutes دقيقة</small>
+                                    </div>
+                                    <div class="video-number">
+                                        <span class="badge bg-light text-dark">@(i + 1)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <style>
+        /* RTL Support */
+        body {
+            text-align: right;
+            direction: rtl;
+        }
+
+        /* Header Styles */
+        .course-header {
+            background: linear-gradient(135deg, #4a6bff 0%, #0c2b8e 100%);
+            margin-bottom: 30px;
+        }
+
+        /* Video Player Styles */
+        .video-player-container {
+            border: 1px solid #dee2e6;
+        }
+
+        .playlist-container {
+            background-color: #f8f9fa;
+        }
+
+        .playlist-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .playlist-item:hover {
+                background-color: #e9ecef;
+            }
+
+            .playlist-item.active {
+                background-color: #e3f2fd;
+                border-right: 3px solid #0d6efd;
+            }
+
+            .playlist-item.disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+                background-color: #f8f9fa;
+            }
+
+        .video-overlay {
+            background: rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .play-button {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Custom Scrollbar */
+        .playlist-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .playlist-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .playlist-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+            .playlist-container::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+        /* Responsive Design */
+        @@media (max-width: 992px) {
+            .video-wrapper {
+                height: 350px !important;
+            }
+        }
+
+        @@media (max-width: 768px) {
+            .video-wrapper {
+                height: 300px !important;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const video = document.getElementById("mainVideo");
+            const status = document.getElementById("videoStatus");
+            const currentVideoTitle = document.getElementById("currentVideoTitle");
+            let currentItem = document.querySelector(".playlist-item.active");
+            let watchTimeout;
+
+            // Initialize variables
+            let currentVideoId = currentItem?.dataset.videoId;
+            let courseId = currentItem?.dataset.courseId;
+            let isWatched = currentItem?.dataset.isWatched === "true";
+            let nextId = currentItem?.dataset.nextId;
+
+            // Set active playlist item
+            const setActive = (element) => {
+                document.querySelectorAll(".playlist-item").forEach(item => {
+                    item.classList.remove("active");
+                });
+                element.classList.add("active");
+
+                // Update video title
+                const videoTitle = element.querySelector(".video-info h6").textContent;
+                currentVideoTitle.textContent = videoTitle;
+            };
+
+            // Playlist item click handler
+            document.querySelectorAll(".playlist-item:not(.disabled)").forEach(item => {
+                item.addEventListener("click", () => {
+                    if (item.classList.contains("disabled")) return;
+
+                    const src = item.dataset.videoSrc;
+                    video.src = src;
+                    status.innerHTML = `
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                        جاري تحميل الفيديو...
+                    `;
+
+                    setActive(item);
+                    currentVideoId = item.dataset.videoId;
+                    courseId = item.dataset.courseId;
+                    isWatched = item.dataset.isWatched === "true";
+                    nextId = item.dataset.nextId;
+
+                    // Clear previous timeout if exists
+                    if (watchTimeout) clearTimeout(watchTimeout);
+
+                    // Play video and handle watching status
+                    video.play().then(() => {
+                        watchHandler();
+                    }).catch(e => {
+                        status.innerHTML = `<span class="text-danger">حدث خطأ أثناء تشغيل الفيديو</span>`;
+                    });
+                });
+            });
+
+            // Handle watching logic
+            function watchHandler() {
+                if (isWatched) {
+                    status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> تم مشاهدته مسبقاً</span>`;
+                    return;
+                }
+
+                // Show loading status
+                status.innerHTML = `
+                    <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    جاري تسجيل مشاهدتك للفيديو...
+                `;
+
+                // Set timeout to mark as watched after 20 seconds
+                watchTimeout = setTimeout(async () => {
+                    try {
+                        const formData = new FormData();
+                        formData.append("videoId", currentVideoId);
+                        formData.append("courseId", courseId);
+
+                        const response = await fetch("/StudentDashboard/MarkAsWatched", {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        if (response.ok) {
+                            // Update UI
+                            status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> تم تسجيل المشاهدة</span>`;
+                            currentItem.dataset.isWatched = "true";
+                            currentItem.querySelector(".video-icon i").className = "fas fa-check-circle text-success";
+
+                            // Unlock next video if exists
+                            if (nextId && nextId != "0") {
+                                const nextItem = document.querySelector(`.playlist-item[data-video-id='${nextId}']`);
+                                if (nextItem) {
+                                    nextItem.classList.remove("disabled");
+                                    nextItem.querySelector(".video-icon i").className = "fas fa-play-circle text-primary";
+                                }
+                            }
+
+                            // Update progress
+                            updateCourseProgress();
+                        }
+                    } catch (error) {
+                        status.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i> فشل في تسجيل المشاهدة</span>`;
+                    }
+                }, 20000); // 20 seconds delay
+            }
+
+            // Update course progress
+            function updateCourseProgress() {
+                const totalVideos = @totalVideos;
+                const watchedItems = document.querySelectorAll('.playlist-item[data-is-watched="true"]').length;
+                const newProgress = (watchedItems / totalVideos) * 100;
+
+                // Update progress bar
+                const progressBar = document.querySelector('.progress-bar');
+                progressBar.style.width = `${newProgress}%`;
+                progressBar.setAttribute('aria-valuenow', newProgress);
+
+                // Update progress text
+                document.querySelector('.course-progress .fw-bold').textContent = `${Math.round(newProgress)}%`;
+                document.querySelector('.course-progress .text-muted.small').textContent =
+                    `${watchedItems} من ${totalVideos} فيديو مكتمل`;
+            }
+
+            // Video event listeners
+            video.addEventListener('play', () => {
+                status.innerHTML = `<span class="text-primary"><i class="fas fa-eye me-1"></i> جاري المشاهدة...</span>`;
+            });
+
+            video.addEventListener('ended', () => {
+                status.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> اكتمل الفيديو</span>`;
+            });
+
+            // Initialize first video
+            if (firstVideo) {
+                const videoTitle = document.querySelector(".playlist-item.active .video-info h6").textContent;
+                currentVideoTitle.textContent = videoTitle;
+                watchHandler();
+            }
+        });
+    </script>
+}
